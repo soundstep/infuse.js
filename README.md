@@ -148,7 +148,8 @@ Full example:
 ## getInstance vs createInstance
 
 The method createInstance will always return a new instance.
-The method getInstance needs to have a mapping registered and might return the same instance depending if the class has been mapped has singleton.
+
+The method getInstance needs to have a mapping registered and might return the same instance depending if the class has been mapped as singleton.
 
 	// return a new instance every time
 	var instance1 = injector.createInstance(MyClass);
@@ -162,7 +163,7 @@ The method getInstance needs to have a mapping registered and might return the s
 	var instance3 = injector.getInstance(MyClass);
 
 	// return the same instance every time
-	injector.mapClass("name", MyClass, true);
+	injector.mapClass("name", MyClass, true); // mapped as singleton
 	var instance1 = injector.getInstance(MyClass);
 	var instance2 = injector.getInstance(MyClass);
 	var instance3 = injector.getInstance(MyClass);
