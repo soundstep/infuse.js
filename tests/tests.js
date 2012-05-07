@@ -341,4 +341,27 @@ describe("infuse.js", function () {
 		expect(injectee.name3).toBeNull();
 	});
 
+	it("post construct called", function () {
+		var t = "gna";
+		var FooClass = function(){
+			this.postConstructCalled = false;
+		};
+		FooClass.prototype = {
+			postConstruct: function() {
+				this.postConstructCalled = true;
+			}
+		};
+		var foo = injector.createInstance(FooClass);
+		expect(foo.postConstructCalled).toBeTruthy();
+	});
+
+	it("post construct absent", function () {
+		var t = "gna";
+		var FooClass = function(){
+			this.postConstructCalled = false;
+		};
+		var foo = injector.createInstance(FooClass);
+		expect(foo.postConstructCalled).toBeFalsy();
+	});
+
 });

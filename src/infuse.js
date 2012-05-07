@@ -136,7 +136,11 @@ var infuse = window.infuse || {};
 						}
 						this.inject(injectee);
 					}
+
 				}
+			}
+			if (typeof target.postConstruct === 'function') {
+				target.postConstruct();
 			}
 			return this;
 		},

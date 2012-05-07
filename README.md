@@ -59,14 +59,14 @@ Full example:
 
 ## map class
 
-	injector.mapValue("model", MyModel);
+	injector.mapClass("model", MyModel);
 
 Full example:
 
 	// create injector
 	var injector = new infuse.Injector();
 	// map class to the model property
-	injector.mapValue("model", MyModel);
+	injector.mapClass("model", MyModel);
 	// create model class
 	var MyModel = function() {
 		this.data = "data";
@@ -83,14 +83,14 @@ Full example:
 
 ## map class as singleton
 
-	injector.mapValue("model", MyModel, true);
+	injector.mapClass("model", MyModel, true);
 
 Full example:
 
 	// create injector
 	var injector = new infuse.Injector();
 	// map class to the model property
-	injector.mapValue("model", MyModel, true);
+	injector.mapClass("model", MyModel, true);
 	// create model class
 	var MyModel = function() {
 		this.data = "data";
@@ -114,7 +114,7 @@ Full example:
 	// create injector
 	var injector = new infuse.Injector();
 	// map class to the model property
-	injector.mapValue("model", MyModel);
+	injector.mapClass("model", MyModel);
 	// create model class
 	var MyModel = function() {
 		this.data = "data";
@@ -134,7 +134,7 @@ Full example:
 	// create injector
 	var injector = new infuse.Injector();
 	// map class to the model property
-	injector.mapValue("model", MyModel, true);
+	injector.mapClass("model", MyModel, true);
 	// create model class
 	var MyModel = function() {
 		this.data = "data";
@@ -144,4 +144,47 @@ Full example:
 	alert(model1); // contains a MyModel instance
 	var model2 = injector.getInstance(MyModel);
 	alert(model2); // model2 is identical to model1
+
+## getInstance vs createInstance
+
+The method createInstance will always return a new instance.
+The method getInstance needs to have a mapping registered and might return the same instance depending if the class has been mapped has singleton.
+
+	// return a new instance every time
+	var instance1 = injector.createInstance(MyClass);
+	var instance2 = injector.createInstance(MyClass);
+	var instance3 = injector.createInstance(MyClass);
+
+	// return a new instance every time
+	injector.mapClass("name", MyClass);
+	var instance1 = injector.getInstance(MyClass);
+	var instance2 = injector.getInstance(MyClass);
+	var instance3 = injector.getInstance(MyClass);
+
+	// return the same instance every time
+	injector.mapClass("name", MyClass, true);
+	var instance1 = injector.getInstance(MyClass);
+	var instance2 = injector.getInstance(MyClass);
+	var instance3 = injector.getInstance(MyClass);
+
+## post construct
+
+A post construct method can be added, it will be automatically called once the injection is done.
+
+	// create injector
+	var injector = new infuse.Injector();
+	// map value to the data property
+	injector.mapValue("data", "some data");
+	// create model class
+	var MyModel = function() {
+		this.data = null;
+	}
+	MyModel.prototype = {
+		postConstruct: function() {
+			// called after injection
+			// this.data is injected
+			alert(this.data);
+		}
+	}
+	injector.createInstance(MyModel);
 
