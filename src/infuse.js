@@ -1,8 +1,8 @@
-var infuse = (function() {
+var infuse = window.infuse || {};
 
-	var mappings;
+(function() {
 
-	this.InjectorError = {
+	infuse.InjectorError = {
 		MAPPING_BAD_PROP: "[Error infuse.Injector.mapClass/mapValue] the first parameter is invalid, a string is expected",
 		MAPPING_BAD_VALUE: "[Error infuse.Injector.mapClass/mapValue] the second parameter is invalid, it can't null or undefined, with property: ",
 		MAPPING_BAD_CLASS: "[Error infuse.Injector.mapClass/mapValue] the second parameter is invalid, a function is expected, with property: ",
@@ -23,9 +23,6 @@ var infuse = (function() {
 	var validateProp = function(prop) {
 		if (typeof prop !== "string") {
 			throw new Error(infuse.InjectorError.MAPPING_BAD_PROP);
-		}
-		if (mappings[prop]) {
-			throw new Error(infuse.InjectorError.MAPPING_ALREADY_EXISTS + prop);
 		}
 	}
 
@@ -59,40 +56,46 @@ var infuse = (function() {
 		return new (Function.prototype.bind.apply(TargetClass, args));
 	}
 
-	this.Injector = function() {
-		mappings = {};
+	infuse.Injector = function() {
+		this.mappings = {};
 	};
 
-	this.Injector.prototype = {
+	infuse.Injector.prototype = {
 
 		mapValue: function(prop, val) {
+			if (this.mappings[prop]) {
+				throw new Error(infuse.InjectorError.MAPPING_ALREADY_EXISTS + prop);
+			}
 			validateProp(prop);
 			validateValue(prop, val);
-			mappings[prop] = new MappingVO(prop, val);
+			this.mappings[prop] = new MappingVO(prop, val);
 			return this;
 		},
 
 		mapClass: function(prop, cl, singleton) {
+			if (this.mappings[prop]) {
+				throw new Error(infuse.InjectorError.MAPPING_ALREADY_EXISTS + prop);
+			}
 			validateProp(prop);
 			validateClass(prop, cl);
 			if (singleton) validateBooleanSingleton(prop, singleton);
-			mappings[prop] = new MappingVO(prop, null, cl, singleton);
+			this.mappings[prop] = new MappingVO(prop, null, cl, singleton);
 			return this;
 		},
 
 		removeMapping: function(prop) {
-			mappings[prop] = null;
-			delete mappings[prop];
+			this.mappings[prop] = null;
+			delete this.mappings[prop];
 			return this;
 		},
 
 		hasMapping: function(prop) {
-			return !!mappings[prop];
+			return !!this.mappings[prop];
 		},
 
 		getMapping: function(value) {
-			for (var name in mappings) {
-				var vo = mappings[name];
+			for (var name in this.mappings) {
+				var vo = this.mappings[name];
 				if (vo.value === value || vo.class === value) {
 					return vo.prop;
 				}
@@ -100,7 +103,7 @@ var infuse = (function() {
 		},
 
 		getMappingValue: function(prop) {
-			var vo = mappings[prop];
+			var vo = this.mappings[prop];
 			if (!vo) return undefined;
 			if (vo.class) return vo.class;
 			if (vo.value) return vo.value;
@@ -108,8 +111,8 @@ var infuse = (function() {
 		},
 
 		inject: function(target) {
-			for (var name in mappings) {
-				var vo = mappings[name];
+			for (var name in this.mappings) {
+				var vo = this.mappings[name];
 				if (target.hasOwnProperty(vo.prop)) {
 					var val = vo.value;
 					var injectee;
@@ -145,8 +148,8 @@ var infuse = (function() {
 		},
 
 		getInstance: function(cl) {
-			for (var name in mappings) {
-				var vo = mappings[name];
+			for (var name in this.mappings) {
+				var vo = this.mappings[name];
 				if (vo.class == cl) {
 					if (vo.singleton) {
 						if (!vo.value) vo.value = this.createInstance(cl);
@@ -161,7 +164,7 @@ var infuse = (function() {
 		},
 
 		dispose: function() {
-			mappings = {};
+			this.mappings = {};
 		}
 
 	};
@@ -197,7 +200,5 @@ var infuse = (function() {
 		};
 	}
 
-	return this;
-
-}).call(infuse || {});
+})();
 

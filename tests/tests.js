@@ -17,6 +17,13 @@ describe("infuse.js", function () {
 		expect(injector instanceof infuse.Injector).toBeTruthy();
 	});
 
+	it("create 2 injectors", function () {
+		var inj1 = new infuse.Injector();
+		var inj2 = new infuse.Injector();
+		inj1.mapValue("name", "John");
+		expect(inj2.hasMapping("name")).toBeFalsy();
+	});
+
 	it("has mapping value", function () {
 		injector.mapValue("name", "John");
 		expect(injector.hasMapping("name")).toBeTruthy();
