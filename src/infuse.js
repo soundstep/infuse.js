@@ -1,6 +1,7 @@
 var infuse = window.infuse || {};
 
 (function() {
+    "use strict";
 
 	infuse.InjectorError = {
 		MAPPING_BAD_PROP: "[Error infuse.Injector.mapClass/mapValue] the first parameter is invalid, a string is expected",
@@ -16,7 +17,7 @@ var infuse = window.infuse || {};
 	var MappingVO = function(prop, value, cl, singleton) {
 		this.prop = prop;
 		this.value = value;
-		this.class = cl;
+		this.cl = cl;
 		this.singleton = singleton || false;
 	};
 
@@ -24,25 +25,25 @@ var infuse = window.infuse || {};
 		if (typeof prop !== "string") {
 			throw new Error(infuse.InjectorError.MAPPING_BAD_PROP);
 		}
-	}
+	};
 
 	var validateValue = function(prop, val) {
 		if (!val) {
 			throw new Error(infuse.InjectorError.MAPPING_BAD_VALUE + prop);
 		}
-	}
+	};
 
 	var validateClass = function(prop, val) {
 		if (typeof val !== "function") {
 			throw new Error(infuse.InjectorError.MAPPING_BAD_CLASS + prop);
 		}
-	}
+	};
 
 	var validateBooleanSingleton = function(prop, singleton) {
 		if (typeof singleton !== "boolean") {
 			throw new Error(infuse.InjectorError.MAPPING_BAD_SINGLETON + prop);
 		}
-	}
+	};
 
 	var instantiate = function() {
 		if (typeof arguments[0] !== "function") {
@@ -54,7 +55,7 @@ var infuse = window.infuse || {};
 			args.push(arguments[i]);
 		}
 		return new (Function.prototype.bind.apply(TargetClass, args));
-	}
+	};
 
 	infuse.Injector = function() {
 		this.mappings = {};
@@ -96,7 +97,7 @@ var infuse = window.infuse || {};
 		getMapping: function(value) {
 			for (var name in this.mappings) {
 				var vo = this.mappings[name];
-				if (vo.value === value || vo.class === value) {
+				if (vo.value === value || vo.cl === value) {
 					return vo.prop;
 				}
 			}
@@ -105,7 +106,7 @@ var infuse = window.infuse || {};
 		getMappingValue: function(prop) {
 			var vo = this.mappings[prop];
 			if (!vo) return undefined;
-			if (vo.class) return vo.class;
+			if (vo.cl) return vo.cl;
 			if (vo.value) return vo.value;
 			return undefined;
 		},
@@ -116,16 +117,16 @@ var infuse = window.infuse || {};
 				if (target.hasOwnProperty(vo.prop)) {
 					var val = vo.value;
 					var injectee;
-					if (vo.class) {
+					if (vo.cl) {
 						if (vo.singleton) {
 							if (!vo.value) {
-								vo.value = instantiate(vo.class);
+								vo.value = instantiate(vo.cl);
 								injectee = vo.value;
 							}
 							val = vo.value;
 						}
 						else {
-							val = instantiate(vo.class);
+							val = instantiate(vo.cl);
 							injectee = val;
 						}
 					}
@@ -154,7 +155,7 @@ var infuse = window.infuse || {};
 		getInstance: function(cl) {
 			for (var name in this.mappings) {
 				var vo = this.mappings[name];
-				if (vo.class == cl) {
+				if (vo.cl == cl) {
 					if (vo.singleton) {
 						if (!vo.value) vo.value = this.createInstance(cl);
 						return vo.value;
