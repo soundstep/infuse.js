@@ -1,3 +1,16 @@
+/*
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * The Original Code is infuse.js.
+ *
+ * The Initial Developer of the Original Code is Romuald Quantin
+ * romu@soundstep.com (www.soundstep.com)
+ *
+ * Initial Developer are Copyright (C) 2008-2012 Soundstep. All Rights Reserved.
+ */
+
 ;(function(infuse, undefined) {
     "use strict";
 
