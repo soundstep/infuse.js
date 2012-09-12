@@ -1,17 +1,34 @@
-var infuse = window.infuse || {};
-
-(function() {
+;(function(infuse, undefined) {
     "use strict";
+
+	infuse.version = "0.5.0";
+
+	// regex from angular JS (https://github.com/angular/angular.js)
+	var FN_ARGS = /^function\s*[^\(]*\(\s*([^\)]*)\)/m;
+	var FN_ARG_SPLIT = /,/;
+	var FN_ARG = /^\s*(_?)(\S+?)\1\s*$/;
+	var STRIP_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg;
+
+	if(!Array.prototype.contains) {
+	    Array.prototype.contains = function(value) {
+	        var i = this.length;
+	        while (i--) {
+	            if (this[i] === value) return true;
+	        }
+	        return false;
+	    };
+	}
 
 	infuse.InjectorError = {
 		MAPPING_BAD_PROP: "[Error infuse.Injector.mapClass/mapValue] the first parameter is invalid, a string is expected",
-		MAPPING_BAD_VALUE: "[Error infuse.Injector.mapClass/mapValue] the second parameter is invalid, it can't null or undefined, with property: ",
+		MAPPING_BAD_VALUE: "[Error infuse.Injector.mapClass/mapValue] the sescond parameter is invalid, it can't null or undefined, with property: ",
 		MAPPING_BAD_CLASS: "[Error infuse.Injector.mapClass/mapValue] the second parameter is invalid, a function is expected, with property: ",
 		MAPPING_BAD_SINGLETON: "[Error infuse.Injector.mapClass] the third parameter is invalid, a boolean is expected, with property: ",
 		MAPPING_ALREADY_EXISTS: "[Error infuse.Injector.mapClass/mapValue] this mapping already exists, with property: ",
 		CREATE_INSTANCE_INVALID_PARAM: "[Error infuse.Injector.createInstance] invalid parameter, a function is expected",
 		GET_INSTANCE_NO_MAPPING: "[Error infuse.Injector.getInstance] no mapping found",
-		INJECT_INSTANCE_IN_ITSELF: "[Error infuse.Injector.inject] A matching property has been found in the target, you can't inject an instance in itself"
+		INJECT_INSTANCE_IN_ITSELF_PROPERTY: "[Error infuse.Injector.getInjectedValue] A matching property has been found in the target, you can't inject an instance in itself",
+		INJECT_INSTANCE_IN_ITSELF_CONSTRUCTOR: "[Error infuse.Injector.getInjectedValue] A matching constructor parameter has been found in the target, you can't inject an instance in itself"
 	};
 
 	var MappingVO = function(prop, value, cl, singleton) {
@@ -45,7 +62,34 @@ var infuse = window.infuse || {};
 		}
 	};
 
-	var instantiate = function() {
+	var validateConstructorInjectionLoop = function(name, cl) {
+		var params = getConstructorParams(cl);
+		if (params.contains(name)) {
+			throw new Error(infuse.InjectorError.INJECT_INSTANCE_IN_ITSELF_CONSTRUCTOR);
+		}
+	};
+
+	var validatePropertyInjectionLoop = function(name, target) {
+		if (target.hasOwnProperty(name)) {
+			throw new Error(infuse.InjectorError.INJECT_INSTANCE_IN_ITSELF_PROPERTY);
+		}
+	};
+
+	var getConstructorParams = function(cl) {
+		var args = [];
+		var clStr = cl.toString().replace(STRIP_COMMENTS, '');
+		var argsFlat = clStr.match(FN_ARGS);
+		var spl = argsFlat[1].split(FN_ARG_SPLIT);
+		for (var i=0; i<spl.length; i++) {
+			var arg = spl[i];
+			arg.replace(FN_ARG, function(all, underscore, name){
+				args.push(name);
+	        });
+		}
+		return args;
+	};
+
+	var instantiateIgnoringConstructor = function() {
 		if (typeof arguments[0] !== "function") {
 			throw new Error(infuse.InjectorError.CREATE_INSTANCE_INVALID_PARAM);
 		}
@@ -59,9 +103,23 @@ var infuse = window.infuse || {};
 
 	infuse.Injector = function() {
 		this.mappings = {};
+		this.parent = null;
 	};
 
 	infuse.Injector.prototype = {
+
+		createChild: function() {
+			var injector = new infuse.Injector();
+			injector.parent = this;
+			return injector;
+		},
+
+		getMappingVo: function(prop) {
+			if (!this.mappings) return null;
+			if (this.mappings[prop]) return this.mappings[prop];
+			if (this.parent) return this.parent.getMappingVo(prop);
+			return null;
+		},
 
 		mapValue: function(prop, val) {
 			if (this.mappings[prop]) {
@@ -94,6 +152,10 @@ var infuse = window.infuse || {};
 			return !!this.mappings[prop];
 		},
 
+		hasInheritedMapping: function(prop) {
+			return !!this.getMappingVo(prop);
+		},
+
 		getMapping: function(value) {
 			for (var name in this.mappings) {
 				var vo = this.mappings[name];
@@ -111,33 +173,45 @@ var infuse = window.infuse || {};
 			return undefined;
 		},
 
-		inject: function(target) {
-			for (var name in this.mappings) {
-				var vo = this.mappings[name];
-				if (target.hasOwnProperty(vo.prop)) {
-					var val = vo.value;
-					var injectee;
-					if (vo.cl) {
-						if (vo.singleton) {
-							if (!vo.value) {
-								vo.value = instantiate(vo.cl);
-								injectee = vo.value;
-							}
-							val = vo.value;
-						}
-						else {
-							val = instantiate(vo.cl);
-							injectee = val;
-						}
+		instantiate: function(TargetClass) {
+			if (typeof TargetClass !== "function") {
+				throw new Error(infuse.InjectorError.CREATE_INSTANCE_INVALID_PARAM);
+			}
+			var TargetClass = arguments[0];
+			var args = [null];
+			var params = getConstructorParams(TargetClass, this.mappings);
+			for (var i=0; i<params.length; i++) {
+				if (arguments[i+1]) {
+					// argument found
+					args.push(arguments[i+1]);
+				}
+				else {
+					var name = params[i];
+					// no argument found
+					var vo = this.getMappingVo(name);
+					if (!!vo) {
+						// found mapping
+						var val = this.getInjectedValue(vo, name);
+						args.push(val);
 					}
-					target[name] = val;
-					if (injectee) {
-						if (injectee.hasOwnProperty(name)) {
-							throw new Error(infuse.InjectorError.INJECT_INSTANCE_IN_ITSELF);
-						}
-						this.inject(injectee);
+					else {
+						// no mapping found
+						args.push(undefined);
 					}
+				}
+			}
+			return new (Function.prototype.bind.apply(TargetClass, args));
+		},
 
+		inject: function(target) {
+			if (this.parent) {
+				this.parent.inject(target);
+			}
+			for (var name in this.mappings) {
+				var vo = this.getMappingVo(name);
+				if (target.hasOwnProperty(vo.prop)) {
+					var val = this.getInjectedValue(vo, name);
+					target[name] = val;
 				}
 			}
 			if (typeof target.postConstruct === 'function') {
@@ -146,8 +220,34 @@ var infuse = window.infuse || {};
 			return this;
 		},
 
+		getInjectedValue: function(vo, name) {
+			var val = vo.value;
+			var injectee;
+			if (vo.cl) {
+				var params = getConstructorParams(vo.cl);
+				if (vo.singleton) {
+					if (!vo.value) {
+						validateConstructorInjectionLoop(name, vo.cl);
+						vo.value = this.instantiate(vo.cl);
+						injectee = vo.value;
+					}
+					val = vo.value;
+				}
+				else {
+					validateConstructorInjectionLoop(name, vo.cl);
+					val = this.instantiate(vo.cl);
+					injectee = val;
+				}
+			}
+			if (injectee) {
+				validatePropertyInjectionLoop(name, injectee);
+				this.inject(injectee);
+			}
+			return val;
+		},
+
 		createInstance: function() {
-			var instance = instantiate.apply(null, arguments);
+			var instance = this.instantiate.apply(this, arguments);
 			this.inject(instance);
 			return instance;
 		},
@@ -157,15 +257,19 @@ var infuse = window.infuse || {};
 				var vo = this.mappings[name];
 				if (vo.cl == cl) {
 					if (vo.singleton) {
-						if (!vo.value) vo.value = this.createInstance(cl);
+						if (!vo.value) vo.value = this.createInstance.apply(this, arguments);
 						return vo.value;
 					}
 					else {
-						return this.createInstance(cl);
+						return this.createInstance.apply(this, arguments);
 					}
 				}
 			}
-			throw new Error(infuse.InjectorError.GET_INSTANCE_NO_MAPPING);
+			if (this.parent) {
+				return this.parent.getInstance(cl);
+			} else {
+				throw new Error(infuse.InjectorError.GET_INSTANCE_NO_MAPPING);
+			}
 		},
 
 		dispose: function() {
@@ -205,5 +309,10 @@ var infuse = window.infuse || {};
 		};
 	}
 
-})();
+	// register for AMD module
+	if (typeof define === 'function' && define.amd) {
+	    define("infuse", infuse);
+	}
+
+})(this['infuse'] = this['infuse'] || {});
 

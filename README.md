@@ -1,7 +1,7 @@
 infuse.js
 =========
 
-javascript ioc library based on property name
+javascript ioc library
 
 ## create injector
 
@@ -57,6 +57,20 @@ Full example:
 	var john = injector.createInstance(Person);
 	alert(john.name); // will alert john
 
+Full example with constructor:
+
+	// create injector
+	var injector = new infuse.Injector();
+	// map value to the name property
+	injector.mapValue("name", "John");
+	// create person class
+	var Person = function(name) {
+		this.nameParam = name;
+	}
+	// instantiate Person class and inject values from the constructor
+	var john = injector.createInstance(Person);
+	alert(john.nameParam); // will alert john
+
 ## map class
 
 	injector.mapClass("model", MyModel);
@@ -65,12 +79,12 @@ Full example:
 
 	// create injector
 	var injector = new infuse.Injector();
-	// map class to the model property
-	injector.mapClass("model", MyModel);
 	// create model class
 	var MyModel = function() {
 		this.data = "data";
 	}
+	// map class to the model property
+	injector.mapClass("model", MyModel);
 	// create class that will receive an instance of MyModel class
 	var OtherClass = function() {
 		this.model = null;
@@ -81,6 +95,26 @@ Full example:
 	var other2 = injector.createInstance(OtherClass);
 	alert(other2.model); // contains another MyModel instance
 
+Full example with constructor:
+
+	// create injector
+	var injector = new infuse.Injector();
+	// create model class
+	var MyModel = function() {
+		this.data = "data";
+	}
+	// map class to the model property
+	injector.mapClass("model", MyModel);
+	// create class that will receive an instance of MyModel class
+	var OtherClass = function(model) {
+		this.modelParam = model;
+	}
+	// instantiate Person class and inject values
+	var other1 = injector.createInstance(OtherClass);
+	alert(other1.modelParam); // contains a MyModel instance
+	var other2 = injector.createInstance(OtherClass);
+	alert(other2.modelParam); // contains another MyModel instance
+
 ## map class as singleton
 
 	injector.mapClass("model", MyModel, true);
@@ -89,12 +123,12 @@ Full example:
 
 	// create injector
 	var injector = new infuse.Injector();
-	// map class to the model property
-	injector.mapClass("model", MyModel, true);
 	// create model class
 	var MyModel = function() {
 		this.data = "data";
 	}
+	// map class to the model property
+	injector.mapClass("model", MyModel, true);
 	// create class that will receive an instance of MyModel class
 	var OtherClass = function() {
 		this.model = null;
@@ -105,6 +139,26 @@ Full example:
 	var other2 = injector.createInstance(OtherClass);
 	alert(other2.model); // contains the same model instance as other1
 
+Full example with constructor:
+
+	// create injector
+	var injector = new infuse.Injector();
+	// create model class
+	var MyModel = function() {
+		this.data = "data";
+	}
+	// map class to the model property
+	injector.mapClass("model", MyModel, true);
+	// create class that will receive an instance of MyModel class
+	var OtherClass = function(model) {
+		this.modelParam = model;
+	}
+	// instantiate Person class and inject values
+	var other1 = injector.createInstance(OtherClass);
+	alert(other1.modelParam); // contains a MyModel instance
+	var other2 = injector.createInstance(OtherClass);
+	alert(other2.modelParam); // contains the same model instance as other1
+
 ## get instance
 
 	var model = injector.getInstance(MyModel);
@@ -113,12 +167,12 @@ Full example:
 
 	// create injector
 	var injector = new infuse.Injector();
-	// map class to the model property
-	injector.mapClass("model", MyModel);
 	// create model class
 	var MyModel = function() {
 		this.data = "data";
 	}
+	// map class to the model property
+	injector.mapClass("model", MyModel);
 	// get instance created
 	var model1 = injector.getInstance(MyModel);
 	alert(model1); // contains a MyModel instance
@@ -133,17 +187,44 @@ Full example:
 
 	// create injector
 	var injector = new infuse.Injector();
-	// map class to the model property
-	injector.mapClass("model", MyModel, true);
 	// create model class
 	var MyModel = function() {
 		this.data = "data";
 	}
+	// map class to the model property
+	injector.mapClass("model", MyModel, true);
 	// get instance created
 	var model1 = injector.getInstance(MyModel);
 	alert(model1); // contains a MyModel instance
 	var model2 = injector.getInstance(MyModel);
 	alert(model2); // model2 is identical to model1
+
+## create child injector (inherit the mapping from the parent injecjor)
+
+	var child = injector.createChild();
+
+Full example:
+
+	// create injector
+	var injector = new infuse.Injector();
+	// map value to the name property on the parent injector
+	injector.mapValue("name", "John");
+	// create child injector
+	var child = injector.createChild();
+	// map value to the type property on the child injector
+	child.mapValue("type", "male");
+	// create class that will receive the name and type value
+	var FooClass = function() {
+		this.name = null;
+		this.type = null;
+	}
+	// instance the class with the child injector
+	var fooChild = child.createInstance(FooClass);
+	alert(fooChild.name); // will alert "John"
+	alert(fooChild.type); // will alert "male"
+	var fooParent = injector.createInstance(FooClass);
+	alert(fooParent.name); // will alert "John"
+	alert(fooParent.type); // will alert null
 
 ## getInstance vs createInstance
 

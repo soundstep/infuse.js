@@ -225,10 +225,40 @@ describe("infuse.js", function () {
 		expect(foo1.instance === foo2.instance).toBeTruthy();
 	});
 
+	it("inject class with constructor not singleton into instance", function () {
+		var FooClass1 = function(instance){this.instanceParam=instance};
+		var FooClass2 = function(instance){this.instanceParam=instance};
+		var InstanceClass = function(){};
+		injector.mapClass("instance", InstanceClass);
+		var foo1 = injector.createInstance(FooClass1);
+		var foo2 = injector.createInstance(FooClass2);
+		expect(foo1.instanceParam instanceof InstanceClass).toBeTruthy();
+		expect(foo2.instanceParam instanceof InstanceClass).toBeTruthy();
+		expect(foo1.instanceParam === foo2.instanceParam).toBeFalsy();
+	});
+
+	it("inject class with constructor singleton into instance", function () {
+		var FooClass1 = function(instance){this.instanceParam=instance};
+		var FooClass2 = function(instance){this.instanceParam=instance};
+		var InstanceClass = function(){};
+		injector.mapClass("instance", InstanceClass, true);
+		var foo1 = injector.createInstance(FooClass1);
+		var foo2 = injector.createInstance(FooClass2);
+		expect(foo1.instanceParam instanceof InstanceClass).toBeTruthy();
+		expect(foo2.instanceParam instanceof InstanceClass).toBeTruthy();
+		expect(foo1.instanceParam === foo2.instanceParam).toBeTruthy();
+	});
+
+	it("inject class with constructor in itself throws error", function () {
+		var FooClass = function(name){this.nameParam=name;};
+		injector.mapClass("name", FooClass);
+		expect(function(){injector.getInstance(FooClass)}).toThrow(infuse.InjectorError.INJECT_INSTANCE_IN_ITSELF_CONSTRUCTOR);
+	});
+
 	it("inject class in itself throws error", function () {
 		var FooClass = function(){this.name=null;};
 		injector.mapClass("name", FooClass);
-		expect(function(){injector.getInstance(FooClass)}).toThrow(infuse.InjectorError.INJECT_INSTANCE_IN_ITSELF);
+		expect(function(){injector.getInstance(FooClass)}).toThrow(infuse.InjectorError.INJECT_INSTANCE_IN_ITSELF_PROPERTY);
 	});
 
 	it("create instance", function () {
@@ -285,6 +315,77 @@ describe("infuse.js", function () {
 		expect(foo.age).toEqual(21);
 	});
 
+	it("create instance with constructor mapping", function () {
+		var p1 = "John";
+		var p2 = 31;
+		var p3 = {data:"data"};
+		var p4 = [1, "string", true];
+		var p5 = true;
+		injector.mapValue("p1", p1);
+		injector.mapValue("p2", p2);
+		injector.mapValue("p3", p3);
+		injector.mapValue("p4", p4);
+		injector.mapValue("p5", p5);
+		var FooClass = function(p1, p2, p3, p4, p5){
+			this.param1 = p1;
+			this.param2 = p2;
+			this.param3 = p3;
+			this.param4 = p4;
+			this.param5 = p5;
+		};
+		var foo = injector.createInstance(FooClass);
+		expect(foo.param1).toEqual(p1);
+		expect(foo.param2).toEqual(p2);
+		expect(foo.param3).toEqual(p3);
+		expect(foo.param4).toEqual(p4);
+		expect(foo.param5).toEqual(p5);
+	});
+
+	it("create instance with constructor forced parameters", function () {
+		var p1 = "John";
+		var p2 = 31;
+		var p3 = {data:"data"};
+		injector.mapValue("p1", p1);
+		injector.mapValue("p2", p2);
+		injector.mapValue("p3", p3);
+		var FooClass = function(p1, p2, p3, p4, p5){
+			this.param1 = p1;
+			this.param2 = p2;
+			this.param3 = p3;
+			this.param4 = p4;
+			this.param5 = p5;
+		};
+		var foo = injector.createInstance(FooClass, null, undefined, "forced");
+		expect(foo.param1).toEqual(p1);
+		expect(foo.param2).toEqual(p2);
+		expect(foo.param3).toEqual("forced");
+		expect(foo.param4).toBeUndefined();
+		expect(foo.param5).toBeUndefined();
+	});
+
+	it("create instance with constructor mapping and inheritance", function () {
+		var Human = function(type) {
+			this.typeParam = type
+		}
+		Human.prototype.getType = function() {
+			return this.typeParam;
+		}
+		var Male = function(name) {
+			Human.call(this, "male")
+			this.nameParam = name;
+		}
+		Male.prototype.getName = function() {
+			return this.nameParam;
+		}
+		utils.inherit(Human, Male.prototype);
+		injector.mapValue("name", "John");
+		var male = injector.createInstance(Male);
+		expect(male.typeParam).toEqual("male");
+		expect(male.nameParam).toEqual("John");
+		expect(male.getType()).toEqual("male");
+		expect(male.getName()).toEqual("John");
+	});
+
 	it("get instance", function () {
 		var FooClass = function(){};
 		injector.mapClass("name", FooClass);
@@ -302,6 +403,38 @@ describe("infuse.js", function () {
 	it("get instance bad singleton parameter throws error", function () {
 		var FooClass = function(){};
 		expect(function(){injector.mapClass("name", FooClass, "bad")}).toThrow(infuse.InjectorError.MAPPING_BAD_SINGLETON + "name");
+	});
+
+	it("get instance with constructor mapping", function () {
+		var FooClass = function(type){this.typeParam = type;};
+		injector.mapClass("name", FooClass);
+		injector.mapValue("type", "type");
+		var foo = injector.getInstance(FooClass);
+		expect(foo).not.toBeNull();
+		expect(foo).not.toBeUndefined();
+		expect(foo instanceof FooClass).toBeTruthy();
+		expect(foo.typeParam).toEqual("type");
+	});
+
+	it("get instance with constructor parameters", function () {
+		var FooClass = function(type){this.typeParam = type;};
+		injector.mapClass("name", FooClass);
+		var foo = injector.getInstance(FooClass, "type");
+		expect(foo).not.toBeNull();
+		expect(foo).not.toBeUndefined();
+		expect(foo instanceof FooClass).toBeTruthy();
+		expect(foo.typeParam).toEqual("type");
+	});
+
+	it("get instance with constructor forced parameters", function () {
+		var FooClass = function(type){this.typeParam = type;};
+		injector.mapClass("name", FooClass);
+		injector.mapValue("type", "type");
+		var foo = injector.getInstance(FooClass, "another type");
+		expect(foo).not.toBeNull();
+		expect(foo).not.toBeUndefined();
+		expect(foo instanceof FooClass).toBeTruthy();
+		expect(foo.typeParam).toEqual("another type");
 	});
 
 	it("get instance no singleton", function () {
@@ -332,6 +465,7 @@ describe("infuse.js", function () {
 		injector.mapClass("name3", FooClass, true);
 		injector.dispose();
 		expect(injector.hasMapping("name1")).toBeFalsy();
+		expect(injector.hasMapping("name1")).toBeFalsy();
 		expect(injector.hasMapping("name2")).toBeFalsy();
 		expect(injector.hasMapping("name3")).toBeFalsy();
 		expect(function(){injector.getInstance(FooClass)}).toThrow(infuse.InjectorError.GET_INSTANCE_NO_MAPPING);
@@ -342,7 +476,6 @@ describe("infuse.js", function () {
 	});
 
 	it("post construct called", function () {
-		var t = "gna";
 		var FooClass = function(){
 			this.postConstructCalled = false;
 		};
@@ -356,12 +489,167 @@ describe("infuse.js", function () {
 	});
 
 	it("post construct absent", function () {
-		var t = "gna";
 		var FooClass = function(){
 			this.postConstructCalled = false;
 		};
 		var foo = injector.createInstance(FooClass);
 		expect(foo.postConstructCalled).toBeFalsy();
+	});
+
+	it("scope", function () {
+		var FooClass = function(){
+			this.that = this;
+		};
+		var foo = injector.createInstance(FooClass)
+		expect(foo.that).toEqual(foo);
+	});
+
+	it("child injector creation", function () {
+		var child = injector.createChild();
+		expect(child).not.toBeNull();
+		expect(child).not.toBeUndefined();
+		expect(child).not.toEqual(injector);
+		expect(child instanceof infuse.Injector).toBeTruthy();
+		expect(child.parent).toEqual(injector);
+	});
+
+	it("child injector don't get parent mapping", function () {
+		injector.mapValue("name", "John");
+		var child = injector.createChild();
+		expect(child.hasMapping("name")).toBeFalsy();
+	});
+
+	it("child injector has inherited mapping", function () {
+		injector.mapValue("name", "John");
+		injector.mapValue("type", function(){});
+		var child = injector.createChild();
+		expect(child.hasInheritedMapping("name")).toBeTruthy();
+		expect(child.hasInheritedMapping("type")).toBeTruthy();
+	});
+
+	it("child injector map parent value", function () {
+		injector.mapValue("name", "John");
+		var child = injector.createChild();
+		var FooClass = function(){this.name=null;};
+		var foo = child.createInstance(FooClass);
+		expect(foo.name).toEqual("John");
+	});
+
+	it("child injector create class from parent mapping", function () {
+		var FooClass = function(){};
+		injector.mapClass("name", FooClass);
+		var child = injector.createChild();
+		var foo = child.createInstance(FooClass);
+		expect(foo).not.toBeNull();
+		expect(foo instanceof FooClass).toBeTruthy();
+	});
+
+	it("child injector get instance from parent mapping", function () {
+		var FooClass = function(){};
+		injector.mapClass("name", FooClass);
+		var child = injector.createChild();
+		var foo = child.getInstance(FooClass);
+		expect(foo).not.toBeNull();
+		expect(foo instanceof FooClass).toBeTruthy();
+	});
+
+	it("child injector inject value from parent mapping", function () {
+		var FooClass = function(){this.name=null;};
+		injector.mapValue("name", "John");
+		var foo = new FooClass();
+		var child = injector.createChild();
+		child.inject(foo);
+		expect(foo.name).toEqual("John");
+	});
+
+	it("child injector inject class from parent mapping", function () {
+		var child = injector.createChild();
+		var FooClass = function(){this.instance=null;};
+		var InstanceClass = function(){};
+		injector.mapClass("instance", InstanceClass);
+		var foo = new FooClass();
+		child.inject(foo);
+		expect(foo.instance).not.toBeNull();
+		expect(foo.instance instanceof InstanceClass).toBeTruthy();
+	});
+
+	it("child injector inject class with constructor in itself throws error", function () {
+		var FooClass = function(name){this.nameParam=name;};
+		injector.mapClass("name", FooClass);
+		var child = injector.createChild();
+		expect(function(){child.getInstance(FooClass)}).toThrow(infuse.InjectorError.INJECT_INSTANCE_IN_ITSELF_CONSTRUCTOR);
+	});
+
+	it("child injector inject class in itself throws error", function () {
+		var FooClass = function(){this.name=null;};
+		injector.mapClass("name", FooClass);
+		var child = injector.createChild();
+		expect(function(){child.getInstance(FooClass)}).toThrow(infuse.InjectorError.INJECT_INSTANCE_IN_ITSELF_PROPERTY);
+	});
+
+	it("child injector override mapping value", function () {
+		var FooClass = function(){this.name=null;};
+		injector.mapValue("name", "John");
+		var child = injector.createChild();
+		child.mapValue("name", "David");
+		var foo = child.createInstance(FooClass);
+		expect(foo.name).toEqual("David");
+	});
+
+	it("child injector override mapping class", function () {
+		var FooClass = function(){this.type="parent class";};
+		var FooClassChild = function(){this.type="child class";};
+		var InstanceClass = function(){this.name=null};
+		injector.mapClass("name", FooClass);
+		var child = injector.createChild();
+		child.mapClass("name", FooClassChild);
+		var instance = child.createInstance(InstanceClass);
+		expect(instance.name.type).toEqual("child class");
+		expect(instance.name instanceof FooClassChild).toBeTruthy();
+	});
+
+	it("child injector create instance and get parent and child mapping", function () {
+		var injector = new infuse.Injector();
+		injector.mapValue("name", "John");
+		var child = injector.createChild();
+		child.mapValue("type", "male");
+		var FooClass = function() {
+			this.name = null;
+			this.type = null;
+		}
+		var foo = child.createInstance(FooClass);
+		expect(foo.name).toEqual("John");
+		expect(foo.type).toEqual("male");
+	});
+
+	it("child injector get instance and get parent and child mapping", function () {
+		var injector = new infuse.Injector();
+		injector.mapValue("name", "John");
+		var child = injector.createChild();
+		child.mapValue("type", "male");
+		var FooClass = function() {
+			this.name = null;
+			this.type = null;
+		}
+		child.mapClass("foo", FooClass);
+		var foo = child.getInstance(FooClass);
+		expect(foo.name).toEqual("John");
+		expect(foo.type).toEqual("male");
+	});
+
+	it("child injector get injection from multi layers", function () {
+		var injector = new infuse.Injector();
+		injector.mapValue("name", "John");
+		var child1 = injector.createChild();
+		var child2 = child1.createChild();
+		var child3 = child2.createChild();
+		var child4 = child3.createChild();
+		var FooClass = function(){this.name = null;};
+		var foo1 = child4.createInstance(FooClass);
+		child4.mapClass("foo", FooClass);
+		var foo2 = child4.getInstance(FooClass);
+		expect(foo1.name).toEqual("John");
+		expect(foo2.name).toEqual("John");
 	});
 
 });
