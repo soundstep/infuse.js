@@ -199,7 +199,7 @@ Full example:
 	var model2 = injector.getInstance(MyModel);
 	alert(model2); // model2 is identical to model1
 
-## create child injector (inherit the mapping from the parent injecjor)
+## create child injector (inherit the mapping from the parent injector)
 
 	var child = injector.createChild();
 
