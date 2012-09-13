@@ -3,8 +3,21 @@ infuse.js
 
 javascript ioc library
 
+## installation
+
+Just grab the script (infuse.js) from the repo for a normal use.
+
+Or install it with npm for node.js:
+
+	npm install infuse.js
+
 ## create injector
 
+	var injector = new infuse.Injector();
+
+## create injector with node.js
+
+	var infuse = require(“infuse.js”);
 	var injector = new infuse.Injector();
 
 ## map value
