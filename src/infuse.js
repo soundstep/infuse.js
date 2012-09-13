@@ -14,7 +14,7 @@
 ;(function(infuse, undefined) {
     "use strict";
 
-	infuse.version = "0.5.1";
+	infuse.version = "0.5.2";
 
 	// regex from angular JS (https://github.com/angular/angular.js)
 	var FN_ARGS = /^function\s*[^\(]*\(\s*([^\)]*)\)/m;
