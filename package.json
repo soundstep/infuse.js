@@ -1,0 +1,15 @@
+{
+	"name": "infuse.js",
+	"author": "Romuald Quantin <romu@soundstep.com> (http://www.soundstep.com)",
+	"description": "Javascript IOC library for dependency injection",
+	"keywords": ["infuse.js", "infusejs", "ioc", "di", "dependency", "injection"],
+	"homepage": "https://github.com/soundstep/infuse.js",
+	"repository": {
+		"type": "git",
+		"url": "http://github.com/soundstep/infuse.js.git"
+	},
+	"version": "0.5.0",
+	"main": "src/infuse.js",
+	"devDependencies": {
+	}
+}

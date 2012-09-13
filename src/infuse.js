@@ -14,7 +14,7 @@
 ;(function(infuse, undefined) {
     "use strict";
 
-	infuse.version = "0.5.0";
+	infuse.version = "0.5.1";
 
 	// regex from angular JS (https://github.com/angular/angular.js)
 	var FN_ARGS = /^function\s*[^\(]*\(\s*([^\)]*)\)/m;
@@ -325,6 +325,14 @@
 	// register for AMD module
 	if (typeof define === 'function' && define.amd) {
 	    define("infuse", infuse);
+	}
+	
+	// export for node.js
+	if (typeof exports !== 'undefined') {
+		if (typeof module !== 'undefined' && module.exports) {
+			exports = module.exports = infuse;
+		}
+		exports.infuse = infuse;
 	}
 
 })(this['infuse'] = this['infuse'] || {});
