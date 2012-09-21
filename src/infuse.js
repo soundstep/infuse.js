@@ -20,7 +20,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ;(function(infuse, undefined) {
     "use strict";
 
-	infuse.version = "0.5.3";
+	infuse.version = "0.5.4";
 
 	// regex from angular JS (https://github.com/angular/angular.js)
 	var FN_ARGS = /^function\s*[^\(]*\(\s*([^\)]*)\)/m;
@@ -329,9 +329,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 	}
 
 	// register for AMD module
-	console.log(typeof define, typeof define === 'function', define.amd, infuse)
 	if (typeof define === 'function' && define.amd) {
-		console.log("define", infuse)
 	    define("infuse", infuse);
 	}
 	
