@@ -20,7 +20,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ;(function(infuse, undefined) {
     "use strict";
 
-	infuse.version = "0.5.4";
+	infuse.version = "0.5.5";
 
 	// regex from angular JS (https://github.com/angular/angular.js)
 	var FN_ARGS = /^function\s*[^\(]*\(\s*([^\)]*)\)/m;
@@ -222,9 +222,9 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 			return new (Function.prototype.bind.apply(TargetClass, args));
 		},
 
-		inject: function(target) {
+		inject: function (target, isParent) {
 			if (this.parent) {
-				this.parent.inject(target);
+				this.parent.inject(target, true);
 			}
 			for (var name in this.mappings) {
 				var vo = this.getMappingVo(name);
@@ -233,7 +233,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 					target[name] = val;
 				}
 			}
-			if (typeof target.postConstruct === 'function') {
+			if (typeof target.postConstruct === 'function' && !isParent) {
 				target.postConstruct();
 			}
 			return this;
