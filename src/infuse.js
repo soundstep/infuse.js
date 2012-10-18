@@ -20,7 +20,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ;(function(infuse, undefined) {
     "use strict";
 
-	infuse.version = "0.5.6";
+	infuse.version = "0.6.0";
 
 	// regex from angular JS (https://github.com/angular/angular.js)
 	var FN_ARGS = /^function\s*[^\(]*\(\s*([^\)]*)\)/m;
@@ -40,12 +40,12 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 	infuse.InjectorError = {
 		MAPPING_BAD_PROP: "[Error infuse.Injector.mapClass/mapValue] the first parameter is invalid, a string is expected",
-		MAPPING_BAD_VALUE: "[Error infuse.Injector.mapClass/mapValue] the sescond parameter is invalid, it can't null or undefined, with property: ",
+		MAPPING_BAD_VALUE: "[Error infuse.Injector.mapClass/mapValue] the second parameter is invalid, it can't null or undefined, with property: ",
 		MAPPING_BAD_CLASS: "[Error infuse.Injector.mapClass/mapValue] the second parameter is invalid, a function is expected, with property: ",
 		MAPPING_BAD_SINGLETON: "[Error infuse.Injector.mapClass] the third parameter is invalid, a boolean is expected, with property: ",
 		MAPPING_ALREADY_EXISTS: "[Error infuse.Injector.mapClass/mapValue] this mapping already exists, with property: ",
 		CREATE_INSTANCE_INVALID_PARAM: "[Error infuse.Injector.createInstance] invalid parameter, a function is expected",
-		GET_INSTANCE_NO_MAPPING: "[Error infuse.Injector.getInstance] no mapping found",
+		NO_MAPPING_FOUND: "[Error infuse.Injector.getInstance] no mapping found",
 		INJECT_INSTANCE_IN_ITSELF_PROPERTY: "[Error infuse.Injector.getInjectedValue] A matching property has been found in the target, you can't inject an instance in itself",
 		INJECT_INSTANCE_IN_ITSELF_CONSTRUCTOR: "[Error infuse.Injector.getInjectedValue] A matching constructor parameter has been found in the target, you can't inject an instance in itself"
 	};
@@ -184,11 +184,27 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 			}
 		},
 
-		getMappingValue: function(prop) {
+		getValue: function(prop) {
 			var vo = this.mappings[prop];
-			if (!vo) return undefined;
-			if (vo.cl) return vo.cl;
+			if (!vo) {
+				if (this.parent) return this.parent.getValue.apply(this.parent, arguments);
+				else throw new Error(infuse.InjectorError.NO_MAPPING_FOUND);
+			}
+			if (vo.cl) {
+				arguments[0] = vo.cl;
+				return this.getValueFromClass.apply(this, arguments);
+			}
 			if (vo.value) return vo.value;
+			return undefined;
+		},
+
+		getClass: function(prop) {
+			var vo = this.mappings[prop];
+			if (!vo) {
+				if (this.parent) return this.parent.getClass(prop);
+				else return undefined;
+			}
+			if (vo.cl) return vo.cl;
 			return undefined;
 		},
 
@@ -271,7 +287,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 			return instance;
 		},
 
-		getInstance: function(cl) {
+		getValueFromClass: function(cl) {
 			for (var name in this.mappings) {
 				var vo = this.mappings[name];
 				if (vo.cl == cl) {
@@ -285,9 +301,9 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 				}
 			}
 			if (this.parent) {
-				return this.parent.getInstance(cl);
+				return this.parent.getValueFromClass.apply(this.parent, arguments);
 			} else {
-				throw new Error(infuse.InjectorError.GET_INSTANCE_NO_MAPPING);
+				throw new Error(infuse.InjectorError.NO_MAPPING_FOUND);
 			}
 		},
 

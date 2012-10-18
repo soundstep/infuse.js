@@ -104,21 +104,25 @@ describe("infuse.js", function () {
 		expect(injector.getMapping("John")).toBeUndefined();
 	});
 
-	it("get mapping value value", function () {
+	it("get value", function () {
 		injector.mapValue("name", "John");
-		expect(injector.getMappingValue("name")).toEqual("John");
+		expect(injector.getValue("name")).toEqual("John");
 	});
 
-	it("get mapping value class", function () {
+	it("get value no mapping throws error", function () {
+		expect(function(){injector.getValue("name")}).toThrow(infuse.InjectorError.NO_MAPPING_FOUND);
+	});
+
+	it("get class", function () {
 		var InstanceClass = function(){};
-		injector.mapValue("name", InstanceClass);
-		expect(injector.getMappingValue("name")).toEqual(InstanceClass);
+		injector.mapClass("name", InstanceClass);
+		expect(injector.getClass("name")).toEqual(InstanceClass);
 	});
 
-	it("get non-existing mapping value returns undefined", function () {
-		expect(injector.getMappingValue("name")).toBeUndefined();
-	});
-
+//	it("get non-existing mapping value returns undefined", function () {
+//		expect(injector.getValue("name")).toBeUndefined();
+//	});
+//
 	it("inject property into object", function () {
 		var foo = {name: null};
 		injector.mapValue("name", "John").inject(foo);
@@ -249,16 +253,28 @@ describe("infuse.js", function () {
 		expect(foo1.instanceParam === foo2.instanceParam).toBeTruthy();
 	});
 
-	it("inject class with constructor in itself throws error", function () {
+	it("inject class with constructor in itself throws error with getValue", function () {
 		var FooClass = function(name){this.nameParam=name;};
 		injector.mapClass("name", FooClass);
-		expect(function(){injector.getInstance(FooClass)}).toThrow(infuse.InjectorError.INJECT_INSTANCE_IN_ITSELF_CONSTRUCTOR);
+		expect(function(){injector.getValue("name")}).toThrow(infuse.InjectorError.INJECT_INSTANCE_IN_ITSELF_CONSTRUCTOR);
 	});
 
-	it("inject class in itself throws error", function () {
+	it("inject class with constructor in itself throws error with getValueFromClass", function () {
+		var FooClass = function(name){this.nameParam=name;};
+		injector.mapClass("name", FooClass);
+		expect(function(){injector.getValueFromClass(FooClass)}).toThrow(infuse.InjectorError.INJECT_INSTANCE_IN_ITSELF_CONSTRUCTOR);
+	});
+
+	it("inject class in itself throws error with getValue", function () {
 		var FooClass = function(){this.name=null;};
 		injector.mapClass("name", FooClass);
-		expect(function(){injector.getInstance(FooClass)}).toThrow(infuse.InjectorError.INJECT_INSTANCE_IN_ITSELF_PROPERTY);
+		expect(function(){injector.getValue("name")}).toThrow(infuse.InjectorError.INJECT_INSTANCE_IN_ITSELF_PROPERTY);
+	});
+
+	it("inject class in itself throws error with getValueFromClass", function () {
+		var FooClass = function(){this.name=null;};
+		injector.mapClass("name", FooClass);
+		expect(function(){injector.getValueFromClass(FooClass)}).toThrow(infuse.InjectorError.INJECT_INSTANCE_IN_ITSELF_PROPERTY);
 	});
 
 	it("create instance", function () {
@@ -386,10 +402,19 @@ describe("infuse.js", function () {
 		expect(male.getName()).toEqual("John");
 	});
 
-	it("get instance", function () {
+	it("get instance with getValue", function () {
 		var FooClass = function(){};
 		injector.mapClass("name", FooClass);
-		var foo = injector.getInstance(FooClass);
+		var foo = injector.getValue("name");
+		expect(foo).not.toBeNull();
+		expect(foo).not.toBeUndefined();
+		expect(foo instanceof FooClass).toBeTruthy();
+	});
+
+	it("get instance with getValueFromClass", function () {
+		var FooClass = function(){};
+		injector.mapClass("name", FooClass);
+		var foo = injector.getValueFromClass(FooClass);
 		expect(foo).not.toBeNull();
 		expect(foo).not.toBeUndefined();
 		expect(foo instanceof FooClass).toBeTruthy();
@@ -397,7 +422,7 @@ describe("infuse.js", function () {
 
 	it("get instance no mapping throws error", function () {
 		var FooClass = function(){this.name=null;};
-		expect(function(){injector.getInstance(FooClass)}).toThrow(infuse.InjectorError.GET_INSTANCE_NO_MAPPING);
+		expect(function(){injector.getValueFromClass(FooClass)}).toThrow(infuse.InjectorError.NO_MAPPING_FOUND);
 	});
 
 	it("get instance bad singleton parameter throws error", function () {
@@ -405,53 +430,105 @@ describe("infuse.js", function () {
 		expect(function(){injector.mapClass("name", FooClass, "bad")}).toThrow(infuse.InjectorError.MAPPING_BAD_SINGLETON + "name");
 	});
 
-	it("get instance with constructor mapping", function () {
+	it("get instance with constructor mapping with getValue", function () {
 		var FooClass = function(type){this.typeParam = type;};
 		injector.mapClass("name", FooClass);
 		injector.mapValue("type", "type");
-		var foo = injector.getInstance(FooClass);
+		var foo = injector.getValue("name");
 		expect(foo).not.toBeNull();
 		expect(foo).not.toBeUndefined();
 		expect(foo instanceof FooClass).toBeTruthy();
 		expect(foo.typeParam).toEqual("type");
 	});
 
-	it("get instance with constructor parameters", function () {
+	it("get instance with constructor mapping with getValueFromClass", function () {
 		var FooClass = function(type){this.typeParam = type;};
 		injector.mapClass("name", FooClass);
-		var foo = injector.getInstance(FooClass, "type");
+		injector.mapValue("type", "type");
+		var foo = injector.getValueFromClass(FooClass);
 		expect(foo).not.toBeNull();
 		expect(foo).not.toBeUndefined();
 		expect(foo instanceof FooClass).toBeTruthy();
 		expect(foo.typeParam).toEqual("type");
 	});
 
-	it("get instance with constructor forced parameters", function () {
+	it("get instance with constructor parameters with getValue", function () {
+		var FooClass = function(type){this.typeParam = type;};
+		injector.mapClass("name", FooClass);
+		var foo = injector.getValue("name", "type");
+		expect(foo).not.toBeNull();
+		expect(foo).not.toBeUndefined();
+		expect(foo instanceof FooClass).toBeTruthy();
+		expect(foo.typeParam).toEqual("type");
+	});
+
+	it("get instance with constructor parameters with getValueFromClass", function () {
+		var FooClass = function(type){this.typeParam = type;};
+		injector.mapClass("name", FooClass);
+		var foo = injector.getValueFromClass(FooClass, "type");
+		expect(foo).not.toBeNull();
+		expect(foo).not.toBeUndefined();
+		expect(foo instanceof FooClass).toBeTruthy();
+		expect(foo.typeParam).toEqual("type");
+	});
+
+	it("get instance with constructor forced parameters with getValue", function () {
 		var FooClass = function(type){this.typeParam = type;};
 		injector.mapClass("name", FooClass);
 		injector.mapValue("type", "type");
-		var foo = injector.getInstance(FooClass, "another type");
+		var foo = injector.getValue("name", "another type");
 		expect(foo).not.toBeNull();
 		expect(foo).not.toBeUndefined();
 		expect(foo instanceof FooClass).toBeTruthy();
 		expect(foo.typeParam).toEqual("another type");
 	});
 
-	it("get instance no singleton", function () {
+	it("get instance with constructor forced parameters with getValueFromParam", function () {
+		var FooClass = function(type){this.typeParam = type;};
+		injector.mapClass("name", FooClass);
+		injector.mapValue("type", "type");
+		var foo = injector.getValueFromClass(FooClass, "another type");
+		expect(foo).not.toBeNull();
+		expect(foo).not.toBeUndefined();
+		expect(foo instanceof FooClass).toBeTruthy();
+		expect(foo.typeParam).toEqual("another type");
+	});
+
+	it("get instance no singleton with getValue", function () {
 		var FooClass = function(){};
 		injector.mapClass("name", FooClass);
-		var foo1 = injector.getInstance(FooClass);
-		var foo2 = injector.getInstance(FooClass);
+		var foo1 = injector.getValue("name");
+		var foo2 = injector.getValue("name");
 		expect(foo1 instanceof FooClass).toBeTruthy();
 		expect(foo2 instanceof FooClass).toBeTruthy();
 		expect(foo1 === foo2).toBeFalsy();
 	});
 
-	it("get instance singleton", function () {
+	it("get instance no singleton with getValueFromClass", function () {
+		var FooClass = function(){};
+		injector.mapClass("name", FooClass);
+		var foo1 = injector.getValueFromClass(FooClass);
+		var foo2 = injector.getValueFromClass(FooClass);
+		expect(foo1 instanceof FooClass).toBeTruthy();
+		expect(foo2 instanceof FooClass).toBeTruthy();
+		expect(foo1 === foo2).toBeFalsy();
+	});
+
+	it("get instance singleton with getValue", function () {
 		var FooClass = function(){};
 		injector.mapClass("name", FooClass, true);
-		var foo1 = injector.getInstance(FooClass);
-		var foo2 = injector.getInstance(FooClass);
+		var foo1 = injector.getValue("name");
+		var foo2 = injector.getValue("name");
+		expect(foo1 instanceof FooClass).toBeTruthy();
+		expect(foo2 instanceof FooClass).toBeTruthy();
+		expect(foo1 === foo2).toBeTruthy();
+	});
+
+	it("get instance singleton with getValueFromClass", function () {
+		var FooClass = function(){};
+		injector.mapClass("name", FooClass, true);
+		var foo1 = injector.getValueFromClass(FooClass);
+		var foo2 = injector.getValueFromClass(FooClass);
 		expect(foo1 instanceof FooClass).toBeTruthy();
 		expect(foo2 instanceof FooClass).toBeTruthy();
 		expect(foo1 === foo2).toBeTruthy();
@@ -474,7 +551,9 @@ describe("infuse.js", function () {
 		expect(injector.hasMapping("name1")).toBeFalsy();
 		expect(injector.hasMapping("name2")).toBeFalsy();
 		expect(injector.hasMapping("name3")).toBeFalsy();
-		expect(function(){injector.getInstance(FooClass)}).toThrow(infuse.InjectorError.GET_INSTANCE_NO_MAPPING);
+		expect(function(){injector.getValueFromClass(FooClass)}).toThrow(infuse.InjectorError.NO_MAPPING_FOUND);
+		expect(function(){injector.getValue("name2")}).toThrow(infuse.InjectorError.NO_MAPPING_FOUND);
+		expect(function(){injector.getValue("name3")}).toThrow(infuse.InjectorError.NO_MAPPING_FOUND);
 		var injectee = injector.createInstance(InjecteeClass);
 		expect(injectee.name1).toBeNull();
 		expect(injectee.name2).toBeNull();
@@ -550,13 +629,31 @@ describe("infuse.js", function () {
 		expect(foo instanceof FooClass).toBeTruthy();
 	});
 
-	it("child injector get instance from parent mapping", function () {
+	it("child injector get instance from parent mapping with getValue", function () {
 		var FooClass = function(){};
 		injector.mapClass("name", FooClass);
 		var child = injector.createChild();
-		var foo = child.getInstance(FooClass);
+		var foo = child.getValue("name");
 		expect(foo).not.toBeNull();
 		expect(foo instanceof FooClass).toBeTruthy();
+	});
+
+	it("child injector get instance from parent mapping with getValueFromClass", function () {
+		var FooClass = function(){};
+		injector.mapClass("name", FooClass);
+		var child = injector.createChild();
+		var foo = child.getValueFromClass(FooClass);
+		expect(foo).not.toBeNull();
+		expect(foo instanceof FooClass).toBeTruthy();
+	});
+
+	it("child injector get value from parent mapping", function () {
+		var FooClass = function(){};
+		injector.mapValue("name2", "John");
+		var child = injector.createChild();
+		var name = child.getValue("name2");
+		expect(name).not.toBeNull();
+		expect(name).toEqual("John");
 	});
 
 	it("child injector inject value from parent mapping", function () {
@@ -579,18 +676,32 @@ describe("infuse.js", function () {
 		expect(foo.instance instanceof InstanceClass).toBeTruthy();
 	});
 
-	it("child injector inject class with constructor in itself throws error", function () {
+	it("child injector inject class with constructor in itself throws error with getValue", function () {
 		var FooClass = function(name){this.nameParam=name;};
 		injector.mapClass("name", FooClass);
 		var child = injector.createChild();
-		expect(function(){child.getInstance(FooClass)}).toThrow(infuse.InjectorError.INJECT_INSTANCE_IN_ITSELF_CONSTRUCTOR);
+		expect(function(){child.getValue("name")}).toThrow(infuse.InjectorError.INJECT_INSTANCE_IN_ITSELF_CONSTRUCTOR);
 	});
 
-	it("child injector inject class in itself throws error", function () {
+	it("child injector inject class with constructor in itself throws error with getValueFromClass", function () {
+		var FooClass = function(name){this.nameParam=name;};
+		injector.mapClass("name", FooClass);
+		var child = injector.createChild();
+		expect(function(){child.getValueFromClass(FooClass)}).toThrow(infuse.InjectorError.INJECT_INSTANCE_IN_ITSELF_CONSTRUCTOR);
+	});
+
+	it("child injector inject class in itself throws error with getValue", function () {
 		var FooClass = function(){this.name=null;};
 		injector.mapClass("name", FooClass);
 		var child = injector.createChild();
-		expect(function(){child.getInstance(FooClass)}).toThrow(infuse.InjectorError.INJECT_INSTANCE_IN_ITSELF_PROPERTY);
+		expect(function(){child.getValue("name")}).toThrow(infuse.InjectorError.INJECT_INSTANCE_IN_ITSELF_PROPERTY);
+	});
+
+	it("child injector inject class in itself throws error with getValueFromClass", function () {
+		var FooClass = function(){this.name=null;};
+		injector.mapClass("name", FooClass);
+		var child = injector.createChild();
+		expect(function(){child.getValueFromClass(FooClass)}).toThrow(infuse.InjectorError.INJECT_INSTANCE_IN_ITSELF_PROPERTY);
 	});
 
 	it("child injector override mapping value", function () {
@@ -628,7 +739,7 @@ describe("infuse.js", function () {
 		expect(foo.type).toEqual("male");
 	});
 
-	it("child injector get instance and get parent and child mapping", function () {
+	it("child injector get instance and get parent and child mapping with getValue", function () {
 		var injector = new infuse.Injector();
 		injector.mapValue("name", "John");
 		var child = injector.createChild();
@@ -638,12 +749,27 @@ describe("infuse.js", function () {
 			this.type = null;
 		}
 		child.mapClass("foo", FooClass);
-		var foo = child.getInstance(FooClass);
+		var foo = child.getValue("foo");
 		expect(foo.name).toEqual("John");
 		expect(foo.type).toEqual("male");
 	});
 
-	it("child injector get injection from multi layers", function () {
+	it("child injector get instance and get parent and child mapping with getValueFromClass", function () {
+		var injector = new infuse.Injector();
+		injector.mapValue("name", "John");
+		var child = injector.createChild();
+		child.mapValue("type", "male");
+		var FooClass = function() {
+			this.name = null;
+			this.type = null;
+		}
+		child.mapClass("foo", FooClass);
+		var foo = child.getValueFromClass(FooClass);
+		expect(foo.name).toEqual("John");
+		expect(foo.type).toEqual("male");
+	});
+
+	it("child injector get injection from multi layers with getValue", function () {
 		var injector = new infuse.Injector();
 		injector.mapValue("name", "John");
 		var child1 = injector.createChild();
@@ -653,7 +779,22 @@ describe("infuse.js", function () {
 		var FooClass = function(){this.name = null;};
 		var foo1 = child4.createInstance(FooClass);
 		child4.mapClass("foo", FooClass);
-		var foo2 = child4.getInstance(FooClass);
+		var foo2 = child4.getValue("foo");
+		expect(foo1.name).toEqual("John");
+		expect(foo2.name).toEqual("John");
+	});
+
+	it("child injector get injection from multi layers with getValueFromClass", function () {
+		var injector = new infuse.Injector();
+		injector.mapValue("name", "John");
+		var child1 = injector.createChild();
+		var child2 = child1.createChild();
+		var child3 = child2.createChild();
+		var child4 = child3.createChild();
+		var FooClass = function(){this.name = null;};
+		var foo1 = child4.createInstance(FooClass);
+		child4.mapClass("foo", FooClass);
+		var foo2 = child4.getValueFromClass(FooClass);
 		expect(foo1.name).toEqual("John");
 		expect(foo2.name).toEqual("John");
 	});

@@ -151,6 +151,7 @@ Full example:
 	alert(other1.model); // contains a MyModel instance
 	var other2 = injector.createInstance(OtherClass);
 	alert(other2.model); // contains the same model instance as other1
+	alert(other1.model === other2.model); // alert true
 
 Full example with constructor:
 
@@ -171,10 +172,12 @@ Full example with constructor:
 	alert(other1.modelParam); // contains a MyModel instance
 	var other2 = injector.createInstance(OtherClass);
 	alert(other2.modelParam); // contains the same model instance as other1
+	alert(other1.modelParam === other2.modelParam); // alert true
 
-## get instance
+## get instance with mapping name
 
-	var model = injector.getInstance(MyModel);
+	injector.mapClass("model", MyModel);
+	var model = injector.getValue("model");
 
 Full example:
 
@@ -187,14 +190,16 @@ Full example:
 	// map class to the model property
 	injector.mapClass("model", MyModel);
 	// get instance created
-	var model1 = injector.getInstance(MyModel);
+	var model1 = injector.getValue("model");
 	alert(model1); // contains a MyModel instance
-	var model2 = injector.getInstance(MyModel);
+	var model2 = injector.getValue("model");
 	alert(model2); // contains another MyModel instance
+	alert(model1 === model2); // alert false
 
-## get instance as singleton
+## get instance with mapping name as singleton
 
-	var model = injector.getInstance(MyModel);
+	injector.mapClass("model", MyModel, true);
+	var model = injector.getValue("model");
 
 Full example:
 
@@ -207,10 +212,55 @@ Full example:
 	// map class to the model property
 	injector.mapClass("model", MyModel, true);
 	// get instance created
-	var model1 = injector.getInstance(MyModel);
+	var model1 = injector.getValue("model");
 	alert(model1); // contains a MyModel instance
-	var model2 = injector.getInstance(MyModel);
-	alert(model2); // model2 is identical to model1
+	var model2 = injector.getValue("model");
+	alert(model2); // contains another MyModel instance
+	alert(model1 === model2); // alert true
+
+## get instance with class
+
+	injector.mapClass("model", MyModel);
+	var model = injector.getValueFromClass(MyModel);
+
+Full example:
+
+	// create injector
+	var injector = new infuse.Injector();
+	// create model class
+	var MyModel = function() {
+		this.data = "data";
+	}
+	// map class to the model property
+	injector.mapClass("model", MyModel);
+	// get instance created
+	var model1 = injector.getValueFromClass(MyModel);
+	alert(model1); // contains a MyModel instance
+	var model2 = injector.getValueFromClass(MyModel);
+	alert(model2); // contains another MyModel instance
+	alert(model1 === model2); // alert false
+
+## get instance with class as singleton
+
+	injector.mapClass("model", MyModel, true);
+    var model = injector.getValueFromClass(MyModel);
+
+Full example:
+
+	// create injector
+	var injector = new infuse.Injector();
+	// create model class
+	var MyModel = function() {
+		this.data = "data";
+	}
+	// map class to the model property
+	injector.mapClass("model", MyModel, true);
+	// get instance created
+	var model1 = injector.getValueFromClass(MyModel);
+	alert(model1); // contains a MyModel instance
+	var model2 = injector.getValueFromClass(MyModel);
+	alert(model2); // contains another MyModel instance
+	alert(model1 === model2); // alert true
 
 ## create child injector (inherit the mapping from the parent injector)
 
@@ -239,11 +289,11 @@ Full example:
 	alert(fooParent.name); // will alert "John"
 	alert(fooParent.type); // will alert null
 
-## getInstance vs createInstance
+## getValue vs createInstance
 
 The method createInstance will always return a new instance.
 
-The method getInstance needs to have a mapping registered and might return the same instance depending if the class has been mapped as singleton.
+The method getValue needs to have a mapping registered and might return the same instance depending if the class has been mapped as singleton.
 
 	// return a new instance every time
 	var instance1 = injector.createInstance(MyClass);
@@ -252,15 +302,27 @@ The method getInstance needs to have a mapping registered and might return the s
 
 	// return a new instance every time
 	injector.mapClass("name", MyClass);
-	var instance1 = injector.getInstance(MyClass);
-	var instance2 = injector.getInstance(MyClass);
-	var instance3 = injector.getInstance(MyClass);
+	var instance1 = injector.getValue("name");
+	var instance2 = injector.getValue("name");
+	var instance3 = injector.getValue("name");
+
+	// return a new instance every time
+	injector.mapClass("name", MyClass);
+	var instance1 = injector.getValueFromClass(MyClass);
+	var instance2 = injector.getValueFromClass(MyClass);
+	var instance3 = injector.getValueFromClass(MyClass);
 
 	// return the same instance every time
 	injector.mapClass("name", MyClass, true); // mapped as singleton
-	var instance1 = injector.getInstance(MyClass);
-	var instance2 = injector.getInstance(MyClass);
-	var instance3 = injector.getInstance(MyClass);
+	var instance1 = injector.getValue("name");
+	var instance2 = injector.getValue("name");
+	var instance3 = injector.getValue("name");
+
+	// return the same instance every time
+	injector.mapClass("name", MyClass, true); // mapped as singleton
+	var instance1 = injector.getValueFromClass(MyClass);
+	var instance2 = injector.getValueFromClass(MyClass);
+	var instance3 = injector.getValueFromClass(MyClass);
 
 ## post construct
 
