@@ -457,6 +457,12 @@ describe("infuse.js", function () {
 		expect(foo1 === foo2).toBeTruthy();
 	});
 
+	it("get constructor params", function() {
+		var f = function(name, age, other){};
+		var names = infuse.getConstructorParams(f);
+		expect(infuse.getConstructorParams(f)).toEqual(["name", "age", "other"]);
+	});
+
 	it("dispose", function () {
 		var FooClass = function(){};
 		var InjecteeClass = function(){this.name1=null;this.name2=null;this.name3=null;};

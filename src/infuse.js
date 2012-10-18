@@ -20,7 +20,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ;(function(infuse, undefined) {
     "use strict";
 
-	infuse.version = "0.5.5";
+	infuse.version = "0.5.6";
 
 	// regex from angular JS (https://github.com/angular/angular.js)
 	var FN_ARGS = /^function\s*[^\(]*\(\s*([^\)]*)\)/m;
@@ -82,7 +82,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 	};
 
 	var validateConstructorInjectionLoop = function(name, cl) {
-		var params = getConstructorParams(cl);
+		var params = infuse.getConstructorParams(cl);
 		if (params.contains(name)) {
 			throw new Error(infuse.InjectorError.INJECT_INSTANCE_IN_ITSELF_CONSTRUCTOR);
 		}
@@ -92,20 +92,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 		if (target.hasOwnProperty(name)) {
 			throw new Error(infuse.InjectorError.INJECT_INSTANCE_IN_ITSELF_PROPERTY);
 		}
-	};
-
-	var getConstructorParams = function(cl) {
-		var args = [];
-		var clStr = cl.toString().replace(STRIP_COMMENTS, '');
-		var argsFlat = clStr.match(FN_ARGS);
-		var spl = argsFlat[1].split(FN_ARG_SPLIT);
-		for (var i=0; i<spl.length; i++) {
-			var arg = spl[i];
-			arg.replace(FN_ARG, function(all, underscore, name){
-				args.push(name);
-	        });
-		}
-		return args;
 	};
 
 	var instantiateIgnoringConstructor = function() {
@@ -123,6 +109,20 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 	infuse.Injector = function() {
 		this.mappings = {};
 		this.parent = null;
+	};
+
+	infuse.getConstructorParams = function(cl) {
+		var args = [];
+		var clStr = cl.toString().replace(STRIP_COMMENTS, '');
+		var argsFlat = clStr.match(FN_ARGS);
+		var spl = argsFlat[1].split(FN_ARG_SPLIT);
+		for (var i=0; i<spl.length; i++) {
+			var arg = spl[i];
+			arg.replace(FN_ARG, function(all, underscore, name){
+				args.push(name);
+			});
+		}
+		return args;
 	};
 
 	infuse.Injector.prototype = {
@@ -198,7 +198,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 			}
 			var TargetClass = arguments[0];
 			var args = [null];
-			var params = getConstructorParams(TargetClass, this.mappings);
+			var params = infuse.getConstructorParams(TargetClass, this.mappings);
 			for (var i=0; i<params.length; i++) {
 				if (arguments[i+1]) {
 					// argument found
@@ -243,7 +243,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 			var val = vo.value;
 			var injectee;
 			if (vo.cl) {
-				var params = getConstructorParams(vo.cl);
+				var params = infuse.getConstructorParams(vo.cl);
 				if (vo.singleton) {
 					if (!vo.value) {
 						validateConstructorInjectionLoop(name, vo.cl);
