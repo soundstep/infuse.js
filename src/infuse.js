@@ -20,7 +20,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ;(function(infuse, undefined) {
     "use strict";
 
-	infuse.version = "0.6.1";
+	infuse.version = "0.6.2";
 
 	// regex from angular JS (https://github.com/angular/angular.js)
 	var FN_ARGS = /^function\s*[^\(]*\(\s*([^\)]*)\)/m;
@@ -146,7 +146,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 			}
 			validateProp(prop);
 			validateValue(prop, val);
-			console.log(prop, val);
 			this.mappings[prop] = new MappingVO(prop, val);
 			return this;
 		},
