@@ -299,6 +299,21 @@ describe("infuse.js", function () {
 		expect(foo instanceof FooClass).toBeTruthy();
 	});
 
+	it("create instance with params", function () {
+		var FooClass = function(p1, p2, p3){
+			this.p1 = p1;
+			this.p2 = p2;
+			this.p3 = p3;
+		};
+		var foo = injector.createInstance(FooClass, 1, false, '');
+		expect(foo).not.toBeNull();
+		expect(foo).not.toBeUndefined();
+		expect(foo instanceof FooClass).toBeTruthy();
+		expect(foo.p1).toEqual(1);
+		expect(foo.p2).toEqual(false);
+		expect(foo.p3).toEqual('');
+	});
+
 	it("create instance no param throws error", function () {
 		var FooClass = function(){};
 		expect(function(){injector.createInstance()}).toThrow(infuse.InjectorError.CREATE_INSTANCE_INVALID_PARAM);

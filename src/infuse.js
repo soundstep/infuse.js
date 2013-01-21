@@ -20,7 +20,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ;(function(infuse, undefined) {
     "use strict";
 
-	infuse.version = "0.6.2";
+	infuse.version = "0.6.3";
 
 	// regex from angular JS (https://github.com/angular/angular.js)
 	var FN_ARGS = /^function\s*[^\(]*\(\s*([^\)]*)\)/m;
@@ -215,7 +215,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 			var args = [null];
 			var params = infuse.getConstructorParams(TargetClass, this.mappings);
 			for (var i=0; i<params.length; i++) {
-				if (arguments[i+1]) {
+				if (arguments[i+1] !== undefined && arguments[i+1] !== null) {
 					// argument found
 					args.push(arguments[i+1]);
 				}
