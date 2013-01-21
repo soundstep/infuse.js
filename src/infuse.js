@@ -20,7 +20,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ;(function(infuse, undefined) {
     "use strict";
 
-	infuse.version = "0.6.0";
+	infuse.version = "0.6.1";
 
 	// regex from angular JS (https://github.com/angular/angular.js)
 	var FN_ARGS = /^function\s*[^\(]*\(\s*([^\)]*)\)/m;
@@ -64,7 +64,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 	};
 
 	var validateValue = function(prop, val) {
-		if (!val) {
+		if (val === undefined || val === null) {
 			throw new Error(infuse.InjectorError.MAPPING_BAD_VALUE + prop);
 		}
 	};
@@ -146,6 +146,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 			}
 			validateProp(prop);
 			validateValue(prop, val);
+			console.log(prop, val);
 			this.mappings[prop] = new MappingVO(prop, val);
 			return this;
 		},
@@ -194,8 +195,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 				arguments[0] = vo.cl;
 				return this.getValueFromClass.apply(this, arguments);
 			}
-			if (vo.value) return vo.value;
-			return undefined;
+			return vo.value;
 		},
 
 		getClass: function(prop) {

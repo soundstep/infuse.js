@@ -109,8 +109,22 @@ describe("infuse.js", function () {
 		expect(injector.getValue("name")).toEqual("John");
 	});
 
+	it("get value boolean", function () {
+		injector.mapValue("bool1", true);
+		injector.mapValue("bool2", false);
+		expect(injector.getValue("bool1")).toEqual(true);
+		expect(injector.getValue("bool2")).toEqual(false);
+	});
+
+	it("get value empty string", function () {
+		injector.mapValue("name", "");
+		expect(injector.getValue("name")).toEqual('');
+	});
+
 	it("get value no mapping throws error", function () {
 		expect(function(){injector.getValue("name")}).toThrow(infuse.InjectorError.NO_MAPPING_FOUND);
+		expect(function(){injector.getValue("name", undefined)}).toThrow(infuse.InjectorError.NO_MAPPING_FOUND);
+		expect(function(){injector.getValue("name", null)}).toThrow(infuse.InjectorError.NO_MAPPING_FOUND);
 	});
 
 	it("get class", function () {
