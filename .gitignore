@@ -43,3 +43,4 @@ phing
 # custom
 
 components
+node_modules

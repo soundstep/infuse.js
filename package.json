@@ -11,5 +11,9 @@
 	"version": "0.6.3",
 	"main": "src/infuse.js",
 	"devDependencies": {
+		"grunt": ">=0.4.x",
+		"grunt-contrib-watch": "*",
+		"grunt-contrib-concat": "*",
+		"grunt-contrib-uglify": "*"
 	}
 }
