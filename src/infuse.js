@@ -21,7 +21,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
     'use strict';
 
-	infuse.version = '0.6.6';
+	infuse.version = '0.6.7';
 
 	// regex from angular JS (https://github.com/angular/angular.js)
 	var FN_ARGS = /^function\s*[^\(]*\(\s*([^\)]*)\)/m;
@@ -361,14 +361,16 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 	}
 
 	// register for AMD module
-	/* globals define:false */
 	if (typeof define === 'function' && typeof define.amd !== 'undefined') {
-		define('infuse', infuse);
+		define("infuse", infuse);
 	}
-	
+
 	// export for node.js
 	if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
 		module.exports = infuse;
+	}
+	if (typeof exports !== 'undefined') {
+		exports = infuse;
 	}
 
 })(this['infuse'] = this['infuse'] || {});
