@@ -22,7 +22,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     'use strict';
 
 	var infuse = {
-		version: '0.6.4'
+		version: '0.6.5'
 	};
 
 	// regex from angular JS (https://github.com/angular/angular.js)
