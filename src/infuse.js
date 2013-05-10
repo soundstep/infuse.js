@@ -17,13 +17,11 @@ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN 
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-(function() {
+(function(infuse) {
 
     'use strict';
 
-	var infuse = {
-		version: '0.6.5'
-	};
+	infuse.version = '0.6.6';
 
 	// regex from angular JS (https://github.com/angular/angular.js)
 	var FN_ARGS = /^function\s*[^\(]*\(\s*([^\)]*)\)/m;
@@ -372,8 +370,5 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 	if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
 		module.exports = infuse;
 	}
-	else {
-		window.infuse = infuse;
-	}
 
-})();
+})(this['infuse'] = this['infuse'] || {});

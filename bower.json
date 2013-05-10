@@ -1,6 +1,6 @@
 {
 	"name": "infuse.js",
-	"version": "0.6.5",
+	"version": "0.6.6",
 	"main": "./src/infuse.js",
 	"dependencies": {}
 }
