@@ -35,6 +35,27 @@ describe("infuse.js", function () {
 		expect(injector.hasMapping("name")).toBeTruthy();
 	});
 
+	it("map class singleton twice with getValue", function () {
+		var InstanceClass = function(){};
+		injector.mapClass("name1", InstanceClass, true);
+		injector.mapClass("name2", InstanceClass, true);
+		var instance1 = injector.getValue("name1");
+		var instance2 = injector.getValue("name2");
+		expect(instance1 !== instance2).toBeTruthy();
+	});
+
+	it("map class singleton twice with injection", function () {
+		var InstanceClass = function(){};
+		injector.mapClass("name1", InstanceClass, true);
+		injector.mapClass("name2", InstanceClass, true);
+		var TestClass1 = function(){this.name1 = null;};
+		var TestClass2 = function(){this.name2 = null;};
+		var instance1 = injector.createInstance(TestClass1);
+		var instance2 = injector.createInstance(TestClass2);
+		expect(instance1 !== instance2).toBeTruthy();
+
+	});
+
 	it("mapping value bad property throws error", function () {
 		expect(function(){injector.mapValue(1, 1)}).toThrow(infuse.InjectorError.MAPPING_BAD_PROP);
 	});
@@ -269,7 +290,7 @@ describe("infuse.js", function () {
 
 	it("inject class with constructor in itself throws error with getValue", function () {
 		var FooClass = function(name){this.nameParam=name;};
-		injector.mapClass("name", FooClass);
+		injector.mapClass("name", FooClass, true);
 		expect(function(){injector.getValue("name")}).toThrow(infuse.InjectorError.INJECT_INSTANCE_IN_ITSELF_CONSTRUCTOR);
 	});
 
