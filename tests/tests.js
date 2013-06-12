@@ -312,6 +312,24 @@ describe("infuse.js", function () {
 		expect(function(){injector.getValueFromClass(FooClass)}).toThrow(infuse.InjectorError.INJECT_INSTANCE_IN_ITSELF_PROPERTY);
 	});
 
+	it("injected in prototype (property)", function () {
+		var FooClass = function(){};
+		FooClass.prototype.name = null;
+		injector.mapValue("name", 'John');
+		var foo = injector.createInstance(FooClass);
+		expect(foo.name).toEqual('John');
+	});
+
+	it("injected in prototype (property) with inheritance", function () {
+		var Human = function(){};
+		Human.prototype.name = null;
+		var Male = function(){};
+		utils.inherit(Human, Male.prototype);
+		injector.mapValue("name", "John");
+		var male = injector.createInstance(Male);
+		expect(male.name).toEqual('John');
+	});
+
 	it("create instance", function () {
 		var FooClass = function(){};
 		var foo = injector.createInstance(FooClass);
