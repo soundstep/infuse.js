@@ -32,4 +32,11 @@
 		return subclass;
 	};
 
+	if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
+		module.exports = utils;
+	}
+	if (typeof exports !== 'undefined') {
+		exports = utils;
+	}
+
 })(this['utils'] = this['utils'] || {});

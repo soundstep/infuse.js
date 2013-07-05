@@ -15,5 +15,8 @@
 		"grunt-contrib-watch": "*",
 		"grunt-contrib-concat": "*",
 		"grunt-contrib-uglify": "*"
+	},
+	"scripts": {
+		"test": "jasmine-node tests/"
 	}
 }

@@ -1,3 +1,8 @@
+if (typeof require !== 'undefined') {
+	var infuse = require('../src/infuse');
+	var utils = require('./lib/utils');
+}
+
 describe("infuse.js", function () {
 
 	var injector;
