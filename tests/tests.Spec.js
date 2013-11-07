@@ -363,8 +363,6 @@ describe("infuse.js", function () {
 		var Human = function(){};
 		Human.prototype.name = null;
 		var Male = function(){};
-		console.log('>>>>>>> ' + typeof utils);
-		console.log('>>>>>>> ' + (this === window));
 		utils.inherit(Human, Male.prototype);
 		injector.mapValue("name", "John");
 		var male = injector.createInstance(Male);
