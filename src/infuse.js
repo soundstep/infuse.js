@@ -21,7 +21,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
     'use strict';
 
-	infuse.version = '0.6.9';
+	infuse.version = '0.6.10';
 
 	// regex from angular JS (https://github.com/angular/angular.js)
 	var FN_ARGS = /^function\s*[^\(]*\(\s*([^\)]*)\)/m;
@@ -29,16 +29,14 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 	var FN_ARG = /^\s*(_?)(\S+?)\1\s*$/;
 	var STRIP_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg;
 
-	if(!Array.prototype.contains) {
-		Array.prototype.contains = function(value) {
-			var i = this.length;
-			while (i--) {
-				if (this[i] === value) {
-					return true;
-				}
+	function contains(arr, value) {
+		var i = arr.length;
+		while (i--) {
+			if (arr[i] === value) {
+				return true;
 			}
-			return false;
-		};
+		}
+		return false;
 	}
 
 	infuse.InjectorError = {
@@ -86,7 +84,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 	var validateConstructorInjectionLoop = function(name, cl) {
 		var params = infuse.getConstructorParams(cl);
-		if (params.contains(name)) {
+		if (contains(params, name)) {
 			throw new Error(infuse.InjectorError.INJECT_INSTANCE_IN_ITSELF_CONSTRUCTOR);
 		}
 	};
