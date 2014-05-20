@@ -601,6 +601,64 @@ describe("infuse.js", function () {
 		expect(foo.typeParam).toEqual("another type");
 	});
 
+  it("get instance with constructor using explicit inject array", function () {
+  		var FooClass = function(a){this.typeParam = a;};
+      FooClass.inject = ['type'];
+  		injector.mapClass("name", FooClass);
+  		injector.mapValue("type", "type");
+  		var foo = injector.getValue("name");
+  		expect(foo).not.toBeNull();
+  		expect(foo).not.toBeUndefined();
+  		expect(foo instanceof FooClass).toBeTruthy();
+  		expect(foo.typeParam).toEqual("type");
+  	});
+
+  it("get instance with constructor using explicit inject array with multiple args", function () {
+      var FooClass = function(a, b, c){this.typeParamA = a;this.typeParamB = b;this.typeParamC = c;};
+      FooClass.inject = ['typeA', 'typeB', 'typeC'];
+      injector.mapClass("name", FooClass);
+      injector.mapValue("typeA", "typeA");
+      injector.mapValue("typeB", "typeB");
+      injector.mapValue("typeC", "typeC");
+      var foo = injector.getValue("name");
+      expect(foo).not.toBeNull();
+      expect(foo).not.toBeUndefined();
+      expect(foo instanceof FooClass).toBeTruthy();
+      expect(foo.typeParamA).toEqual("typeA");
+      expect(foo.typeParamB).toEqual("typeB");
+      expect(foo.typeParamC).toEqual("typeC");
+  });
+
+  it("get instance with constructor using explicit inject array overriding existing type", function () {
+      var FooClass = function(type){this.typeParam = type;};
+      FooClass.inject = ['anotherType'];
+      injector.mapClass("name", FooClass);
+      injector.mapValue("type", "type");
+      injector.mapValue("anotherType", "anotherType");
+      var foo = injector.getValue("name");
+      expect(foo).not.toBeNull();
+      expect(foo).not.toBeUndefined();
+      expect(foo instanceof FooClass).toBeTruthy();
+      expect(foo.typeParam).toEqual("anotherType");
+  });
+
+  it("get instance with constructor using explicit inject array overriding existing type with multiple args", function () {
+      var FooClass = function(typeA, typeB, typeC){this.typeParamA = typeA;this.typeParamB = typeB;this.typeParamC = typeC;};
+      FooClass.inject = [null, 'anotherTypeB']; // Omit final otherwise falsey key
+      injector.mapClass("name", FooClass);
+      injector.mapValue("typeA", "typeA");
+      injector.mapValue("typeB", "typeB");
+      injector.mapValue("typeC", "typeC");
+      injector.mapValue("anotherTypeB", "anotherTypeB");
+      var foo = injector.getValue("name");
+      expect(foo).not.toBeNull();
+      expect(foo).not.toBeUndefined();
+      expect(foo instanceof FooClass).toBeTruthy();
+      expect(foo.typeParamA).toEqual("typeA");
+      expect(foo.typeParamB).toEqual("anotherTypeB");
+      expect(foo.typeParamC).toEqual("typeC");
+  });
+
 	it("get instance no singleton with getValue", function () {
 		var FooClass = function(){};
 		injector.mapClass("name", FooClass);
