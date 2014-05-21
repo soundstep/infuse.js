@@ -91,6 +91,20 @@ Full example with constructor:
 ## specified inject value (minification)
 
 It is also possible to specify the injected value using a static variable "inject", which would describe the arguments that should be sent into the instance.
+	
+	// create injector
+	var injector = new infuse.Injector();
+	// map value to the name property
+	injector.mapValue("name", "John");
+	// person class
+	var Person = function(specifiedName) {
+		this.specifiedName = specifiedName;
+	}
+	// specify injected arguments
+	Person.inject = ["name"];
+	// instantiate Person class and inject values from the constructor
+	var john = injector.createInstance(Person);
+	alert(john.specifiedName); // will alert john
 
 ## map class
 

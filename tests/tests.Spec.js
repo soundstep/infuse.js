@@ -734,7 +734,6 @@ describe("infuse.js", function () {
         };
         var inst = new TestClass();
         injector.inject(inst);
-        console.log(inst);
         expect(inst.name instanceof FooClass).toBeTruthy();
     });
 
