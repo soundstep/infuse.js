@@ -603,7 +603,7 @@ describe("infuse.js", function () {
 
   it("get instance with constructor using explicit inject array", function () {
   		var FooClass = function(a){this.typeParam = a;};
-      FooClass.inject = ['type'];
+        FooClass.inject = ['type'];
   		injector.mapClass("name", FooClass);
   		injector.mapValue("type", "type");
   		var foo = injector.getValue("name");
@@ -705,7 +705,40 @@ describe("infuse.js", function () {
 		expect(infuse.getConstructorParams(f)).toEqual(["name", "age", "other"]);
 	});
 
-	it("dispose", function () {
+    it("property injection with inject property using arguments", function () {
+        var FooClass = function(){};
+        injector.mapClass("name", FooClass, true);
+        var TestClass = function(){
+            this.renamedName = arguments[0];
+        };
+        TestClass.inject = ['name'];
+        var inst = injector.createInstance(TestClass);
+        expect(inst.renamedName instanceof FooClass).toBeTruthy();
+    });
+
+    it("property injection using string", function () {
+        var FooClass = function(){};
+        injector.mapClass("name", FooClass, true);
+        var TestClass = function(){
+            this['name'] = null;
+        };
+        var inst = injector.createInstance(TestClass);
+        expect(inst.name instanceof FooClass).toBeTruthy();
+    });
+
+    it("property injection using string and inject method", function () {
+        var FooClass = function(){};
+        injector.mapClass("name", FooClass, true);
+        var TestClass = function(){
+            this['name'] = null;
+        };
+        var inst = new TestClass();
+        injector.inject(inst);
+        console.log(inst);
+        expect(inst.name instanceof FooClass).toBeTruthy();
+    });
+
+    it("dispose", function () {
 		var FooClass = function(){};
 		var InjecteeClass = function(){this.name1=null;this.name2=null;this.name3=null;};
 		injector.mapValue("name1", "John");

@@ -87,6 +87,10 @@ Full example with constructor:
 	// instantiate Person class and inject values from the constructor
 	var john = injector.createInstance(Person);
 	alert(john.nameParam); // will alert john
+	
+## specified inject value (minification)
+
+It is also possible to specify the injected value using a static variable "inject", which would describe the arguments that should be sent into the instance.
 
 ## map class
 
