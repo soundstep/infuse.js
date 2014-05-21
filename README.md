@@ -54,7 +54,7 @@ Full example:
 	var john = new Person();
 	// inject values in the Person instance
 	injector.inject(john);
-	alert(john.name); // will alert john
+	alert(john.name); // will alert John
 
 or
 
@@ -72,7 +72,7 @@ Full example:
 	}
 	// instantiate Person class and inject values
 	var john = injector.createInstance(Person);
-	alert(john.name); // will alert john
+	alert(john.name); // will alert John
 
 Full example with constructor:
 
@@ -86,7 +86,7 @@ Full example with constructor:
 	}
 	// instantiate Person class and inject values from the constructor
 	var john = injector.createInstance(Person);
-	alert(john.nameParam); // will alert john
+	alert(john.nameParam); // will alert John
 	
 ## specified inject value (minification)
 
@@ -104,7 +104,7 @@ It is also possible to specify the injected value using a static variable "injec
 	Person.inject = ["name"];
 	// instantiate Person class and inject values from the constructor
 	var john = injector.createInstance(Person);
-	alert(john.specifiedName); // will alert john
+	alert(john.specifiedName); // will alert John
 
 ## map class
 
