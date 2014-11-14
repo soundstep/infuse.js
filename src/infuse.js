@@ -21,7 +21,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
     'use strict';
 
-	infuse.version = '0.7.0';
+	infuse.version = '0.7.1';
 
 	// regex from angular JS (https://github.com/angular/angular.js)
 	var FN_ARGS = /^function\s*[^\(]*\(\s*([^\)]*)\)/m;
@@ -108,7 +108,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 		}
 
 		// Override arg name with inject array values if present
-		if( cl.hasOwnProperty('inject') && toString.call(cl.inject) === '[object Array]' && cl.inject.length > 0)
+		if( cl.hasOwnProperty('inject') && Object.prototype.toString.call(cl.inject) === '[object Array]' && cl.inject.length > 0)
 		  inject = cl.inject;
 
 		var clStr = cl.toString().replace(STRIP_COMMENTS, '');
