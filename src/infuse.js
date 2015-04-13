@@ -21,7 +21,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
     'use strict';
 
-	infuse.version = '0.7.1';
+	infuse.version = '0.7.2';
 
 	// regex from angular JS (https://github.com/angular/angular.js)
 	var FN_ARGS = /^function\s*[^\(]*\(\s*([^\)]*)\)/m;
@@ -108,8 +108,9 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 		}
 
 		// Override arg name with inject array values if present
-		if( cl.hasOwnProperty('inject') && Object.prototype.toString.call(cl.inject) === '[object Array]' && cl.inject.length > 0)
-		  inject = cl.inject;
+		if( cl.hasOwnProperty('inject') && Object.prototype.toString.call(cl.inject) === '[object Array]' && cl.inject.length > 0) {
+    		inject = cl.inject;
+        }
 
 		var clStr = cl.toString().replace(STRIP_COMMENTS, '');
 		var argsFlat = clStr.match(FN_ARGS);
@@ -241,7 +242,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 			var args = [null];
 			var params = infuse.getConstructorParams(TargetClass);
 			for (var i=0; i<params.length; i++) {
-				if (arguments[i+1] !== undefined && arguments[i+1] !== null) {
+                if (arguments.length > i+1 && arguments[i+1] !== undefined && arguments[i+1] !== null) {
 					// argument found
 					args.push(arguments[i+1]);
 				}
