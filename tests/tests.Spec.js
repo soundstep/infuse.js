@@ -809,6 +809,12 @@ describe("infuse.js", function () {
 		expect(child.hasInheritedMapping("type")).toBeTruthy();
 	});
 
+	it("child injector map value", function () {
+		var child = injector.createChild();
+		child.mapValue("name", "John");
+		expect(child.hasMapping("name")).toBeTruthy();
+	});
+
 	it("child injector map parent value", function () {
 		injector.mapValue("name", "John");
 		var child = injector.createChild();
@@ -994,6 +1000,76 @@ describe("infuse.js", function () {
 		var foo2 = child4.getValueFromClass(FooClass);
 		expect(foo1.name).toEqual("John");
 		expect(foo2.name).toEqual("John");
+	});
+
+	it("child injector resolve its value with from a parent instantiation", function () {
+		var Parent = function() {
+			this.name = null;
+		};
+		injector.mapClass("parent", Parent);
+		var child = injector.createChild();
+		child.mapValue("name", "John");
+		expect(child.getValue("parent").name).toEqual("John");
+	});
+
+	it("child injector resolve its value with from different parents (getValue)", function () {
+		var Parent = function() {
+			this.depth1 = null;
+			this.depth2 = null;
+			this.depth3 = null;
+		};
+
+		injector.mapClass("parent", Parent);
+		injector.mapValue("depth1", "depth 1");
+
+		var child1 = injector.createChild();
+		child1.mapValue("depth2", "depth 2");
+
+		var child2 = child1.createChild();
+		child2.mapValue("depth3", "depth 3");
+
+		expect(child2.getValue("parent").depth1).toEqual("depth 1");
+		expect(child2.getValue("parent").depth2).toEqual("depth 2");
+		expect(child2.getValue("parent").depth3).toEqual("depth 3");
+
+		expect(child1.getValue("parent").depth1).toEqual("depth 1");
+		expect(child1.getValue("parent").depth2).toEqual("depth 2");
+		expect(child1.getValue("parent").depth3).toEqual(null);
+
+		expect(injector.getValue("parent").depth1).toEqual("depth 1");
+		expect(injector.getValue("parent").depth2).toEqual(null);
+		expect(injector.getValue("parent").depth3).toEqual(null);
+
+	});
+
+	it("child injector resolve its value with from different parents (createInstance)", function () {
+		var Parent = function() {
+			this.depth1 = null;
+			this.depth2 = null;
+			this.depth3 = null;
+		};
+
+		injector.mapClass("parent", Parent);
+		injector.mapValue("depth1", "depth 1");
+
+		var child1 = injector.createChild();
+		child1.mapValue("depth2", "depth 2");
+
+		var child2 = child1.createChild();
+		child2.mapValue("depth3", "depth 3");
+
+		expect(child2.createInstance(Parent).depth1).toEqual("depth 1");
+		expect(child2.createInstance(Parent).depth2).toEqual("depth 2");
+		expect(child2.createInstance(Parent).depth3).toEqual("depth 3");
+
+		expect(child1.createInstance(Parent).depth1).toEqual("depth 1");
+		expect(child1.createInstance(Parent).depth2).toEqual("depth 2");
+		expect(child1.createInstance(Parent).depth3).toEqual(null);
+
+		expect(injector.createInstance(Parent).depth1).toEqual("depth 1");
+		expect(injector.createInstance(Parent).depth2).toEqual(null);
+		expect(injector.createInstance(Parent).depth3).toEqual(null);
+
 	});
 
 });

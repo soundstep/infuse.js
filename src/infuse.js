@@ -197,7 +197,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 			var vo = this.mappings[prop];
 			if (!vo) {
 				if (this.parent) {
-					return this.parent.getValue.apply(this.parent, arguments);
+                    vo = this.parent.getMappingVo.apply(this.parent, arguments);
 				}
 				else {
 					throw new Error(infuse.InjectorError.NO_MAPPING_FOUND);
@@ -223,7 +223,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 			var vo = this.mappings[prop];
 			if (!vo) {
 				if (this.parent) {
-					return this.parent.getClass(prop);
+					vo = this.parent.getMappingVo.apply(this.parent, arguments);
 				}
 				else {
 					return undefined;
