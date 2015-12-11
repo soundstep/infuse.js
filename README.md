@@ -87,11 +87,11 @@ Full example with constructor:
 	// instantiate Person class and inject values from the constructor
 	var john = injector.createInstance(Person);
 	alert(john.nameParam); // will alert John
-	
+
 ## specified inject value (minification)
 
 It is also possible to specify the injected value using a static variable "inject", which would describe the arguments that should be sent into the instance.
-	
+
 	// create injector
 	var injector = new infuse.Injector();
 	// map value to the name property
@@ -105,6 +105,11 @@ It is also possible to specify the injected value using a static variable "injec
 	// instantiate Person class and inject values from the constructor
 	var john = injector.createInstance(Person);
 	alert(john.specifiedName); // will alert John
+
+A strict mode can be enabled, the injector will throw an error if the "inject" property is missing when trying to instantiate a function.
+
+	var injector = new infuse.Injector();
+	injector.strictMode = true;
 
 ## map class
 
@@ -382,4 +387,3 @@ A post construct method can be added, it will be automatically called once the i
 	OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
 	LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
 	IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-	

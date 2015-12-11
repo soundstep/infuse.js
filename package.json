@@ -8,7 +8,7 @@
 		"type": "git",
 		"url": "http://github.com/soundstep/infuse.js.git"
 	},
-	"version": "0.7.4",
+	"version": "1.0.0",
 	"main": "src/infuse.js",
 	"devDependencies": {
 		"grunt": ">=0.4.x",
