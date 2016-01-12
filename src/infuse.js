@@ -133,6 +133,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             var injector = new infuse.Injector();
             injector.parent = this;
             injector.strictMode = this.strictMode;
+            injector.throwOnMissing = this.throwOnMissing;
             return injector;
         },
 

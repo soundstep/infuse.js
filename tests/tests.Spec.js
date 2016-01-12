@@ -1125,6 +1125,12 @@ describe("infuse.js", function () {
 			expect(instantiationError).toContain("customClassName");
 		});
 
+		it("is inherited in child injectors", function() {
+			injector.throwOnMissing = false;
+			var childInjector = injector.createChild();
+			expect(childInjector.throwOnMissing).toBeFalsy();
+		});
+
 	});
 
 });
