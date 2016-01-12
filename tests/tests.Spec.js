@@ -1093,4 +1093,38 @@ describe("infuse.js", function () {
 		expect(function(){childInjector.getValue("name")}).toThrow(infuse.errors.DEPENDENCIES_MISSING_IN_STRICT_MODE);
 	});
 
+	it("throwOnMissing is not enabled by default", function () {
+		expect(injector.throwOnMissing).toBeFalsy();
+	});
+
+	describe("throwOnMissing", function() {
+
+		function getErrorMessage(callback) {
+			try {
+				callback();
+			} catch (e) {
+				return e.message;
+			}
+		}
+
+		beforeEach(function() {
+			injector.throwOnMissing = true;
+			injector.mapClass("fooClass", function(missing){});
+		});
+
+		it("causes requesting a missing value to throw", function () {
+			expect(function(){injector.getValue("missing")}).toThrow();
+			expect(function(){injector.getValue("fooClass")}).toThrow();
+			expect(function(){injector.createInstance(function(missing) {})}).toThrow();
+		});
+
+		it("throws an error that describes the problem when instantiating", function() {
+			expect(getErrorMessage(function(){injector.getValue("fooClass")})).toContain("missing");
+			var instantiationError = getErrorMessage(function(){injector.createInstance(function customClassName(not_a_predefined_string){})});
+			expect(instantiationError).toContain("not_a_predefined_string");
+			expect(instantiationError).toContain("customClassName");
+		});
+
+	});
+
 });

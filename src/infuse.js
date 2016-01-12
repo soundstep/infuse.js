@@ -195,7 +195,11 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
                     }
                 }
             }
-            return undefined;
+            if (this.throwOnMissing) {
+                throw new Error("Missing value '" + value + "'");
+            } else {
+                return undefined;
+            }
         },
 
         getValue: function(prop) {
@@ -265,6 +269,9 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
                     }
                     else {
                         // no mapping found
+                        if (this.throwOnMissing) {
+                            throw new Error(infuse.errors.NO_MAPPING_FOUND + " for dependency '" + name + "' when instantiating '" + TargetClass.name + "'");
+                        }
                         args.push(undefined);
                     }
                 }
