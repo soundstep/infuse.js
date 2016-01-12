@@ -195,11 +195,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
                     }
                 }
             }
-            if (this.throwOnMissing) {
-                throw new Error("Missing value '" + value + "'");
-            } else {
-                return undefined;
-            }
+            return undefined;
         },
 
         getValue: function(prop) {
