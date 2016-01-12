@@ -471,19 +471,15 @@ describe("infuse.js", function () {
 		injector.mapValue("p1", p1);
 		injector.mapValue("p2", p2);
 		injector.mapValue("p3", p3);
-		var FooClass = function(p1, p2, p3, p4, p5){
+		var FooClass = function(p1, p2, p3){
 			this.param1 = p1;
 			this.param2 = p2;
 			this.param3 = p3;
-			this.param4 = p4;
-			this.param5 = p5;
 		};
-		var foo = injector.createInstance(FooClass, null, undefined, "forced");
+		var foo = injector.createInstance(FooClass, null, "forced", undefined);
 		expect(foo.param1).toEqual(p1);
-		expect(foo.param2).toEqual(p2);
-		expect(foo.param3).toEqual("forced");
-		expect(foo.param4).toBeUndefined();
-		expect(foo.param5).toBeUndefined();
+		expect(foo.param2).toEqual("forced");
+		expect(foo.param3).toEqual(p3);
 	});
 
 	it("create instance with constructor mapping and inheritance", function () {
@@ -1093,8 +1089,8 @@ describe("infuse.js", function () {
 		expect(function(){childInjector.getValue("name")}).toThrow(infuse.errors.DEPENDENCIES_MISSING_IN_STRICT_MODE);
 	});
 
-	it("throwOnMissing is not enabled by default", function () {
-		expect(injector.throwOnMissing).toBeFalsy();
+	it("throwOnMissing is enabled by default", function () {
+		expect(injector.throwOnMissing).toBeTruthy();
 	});
 
 	describe("throwOnMissing", function() {

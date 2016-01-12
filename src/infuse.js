@@ -100,6 +100,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         this.mappings = {};
         this.parent = null;
         this.strictMode = false;
+        this.throwOnMissing = true;
     };
 
     infuse.getDependencies = function(cl) {
