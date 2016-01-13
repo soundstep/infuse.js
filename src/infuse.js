@@ -21,7 +21,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
     'use strict';
 
-    infuse.version = '1.0.0';
+    infuse.version = '1.0.1';
 
     // regex from angular JS (https://github.com/angular/angular.js)
     var FN_ARGS = /^function\s*[^\(]*\(\s*([^\)]*)\)/m;
@@ -268,7 +268,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
                     else {
                         // no mapping found
                         if (this.throwOnMissing) {
-                            throw new Error(infuse.errors.NO_MAPPING_FOUND + " for dependency '" + name + "' when instantiating '" + TargetClass.name + "'");
+                            // throw new Error(infuse.errors.NO_MAPPING_FOUND + " for dependency '" + name + "' when instantiating '" + TargetClass.name + "'");
+                            throw new Error(infuse.errors.NO_MAPPING_FOUND + ' for dependency "' + name + '" when instantiating "' + TargetClass.name + '"');
                         }
                         args.push(undefined);
                     }
