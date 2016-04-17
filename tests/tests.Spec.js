@@ -36,6 +36,10 @@ utils.inherit = function(target, obj) {
 	return subclass;
 };
 
+utils.getGlobal = function() {
+	return (typeof process === "undefined" ? window : global);
+}
+
 
 describe("infuse.js", function () {
 
@@ -1130,33 +1134,25 @@ describe("infuse.js", function () {
 	});
 
 	describe("getEsprima()", function() {
-		it("should return window.esprima if available", function() {
-			var oldEsprima = window.esprima;
-			window.esprima = {};
+		it("should return ${GLOBAL}.esprima if available", function() {
+			var oldEsprima = utils.getGlobal().esprima;
+			utils.getGlobal().esprima = {};
 
-			expect(infuse.getEsprima()).toBe(window.esprima);
+			expect(infuse.getEsprima()).toBe(utils.getGlobal().esprima);
 
-			window.esprima = oldEsprima;
-		});
-
-		it("should return global.esprima if available", function() {
-			var oldGlobal = window.global;
-			window.global = { esprima: {} };
-
-			expect(infuse.getEsprima()).toBe(window.global.esprima);
-
-			window.global = oldGlobal;
+			utils.getGlobal().esprima = oldEsprima;
 		});
 
 		it("should attempt to require() if not already available", function() {
 			var fakeEsprima = {};
-			var oldRequire = window.require;
-			window.require = jasmine.createSpy("require").andReturn(fakeEsprima);
+			var oldRequire = utils.getGlobal().require;
+			utils.getGlobal().require = jasmine.createSpy("require");
+			utils.getGlobal().require.andReturn(fakeEsprima);
 
 			expect(infuse.getEsprima()).toBe(fakeEsprima);
-			expect(window.require).toHaveBeenCalled();
+			expect(utils.getGlobal().require).toHaveBeenCalled();
 
-			window.require = oldRequire;
+			utils.getGlobal().require = oldRequire;
 		});
 
 		it("should not error if all of the above fail", function() {

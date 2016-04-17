@@ -128,27 +128,20 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     };
 
     infuse.getEsprima = function() {
+        var esprima = false;
         try {
-            if (window.esprima) {
-                return window.esprima;
-            } else {
-                throw "no window.esprima";
-            }
-        } catch (e) {
-            try {
-                if (global.esprima) {
-                    return global.esprima;
-                } else {
-                    throw "no global.esprima";
-                }
-            } catch (e) {
-                try {
-                    return require("esprima");
-                } catch (e) {
-                    return false;
-                }
-            }
-        }
+            esprima = esprima || window.esprima;
+        } catch (e) {}
+
+        try {
+            esprima = esprima || global.esprima;
+        } catch (e) {}
+
+        try {
+            esprima = esprima || (typeof global !== "undefined" ? global : window).require("esprima");
+        } catch (e) {}
+
+        return esprima;
     }
 
     infuse.getDependenciesFromString = function(clStr) {
@@ -180,7 +173,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             } else {
                 if (/^class/.test(clStr)) {
                     console.log("infuse.js requires esprima to parse ES2015 classes.");
-                )
+                }
                 throw firstE;
             }
         }
