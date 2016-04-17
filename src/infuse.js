@@ -169,7 +169,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
                             spl = constructor.value
                                 .params
                                 .filter(function(param) { return param.type === "Identifier" })
-                                .map(param => param.name);
+                                .map(function(param) { return param.name; });
                         }
                     } else {
                         throw firstE;
