@@ -15,6 +15,11 @@ Or install it with bower:
 
 	bower install infuse.js --save
 
+If you need ES6/ES2015 class support, include [esprima](https://github.com/jquery/esprima) too, from npm or bower:
+
+    npm install esprima
+	bower install esprima --save
+
 ## create injector
 
 	var injector = new infuse.Injector();
