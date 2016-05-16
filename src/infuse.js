@@ -25,7 +25,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
     // regex from angular JS (https://github.com/angular/angular.js)
     var FN_ARGS = /^function\s*[^\(]*\(\s*([^\)]*)\)/m;
-    var FN_ARG_SPLIT = /,/;
+    var FN_ARG_SPLIT = /,\s*/;
     var FN_ARG = /^\s*(_?)(\S+?)\1\s*$/;
     var STRIP_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg;
 
@@ -116,8 +116,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         }
 
         var clStr = cl.toString().replace(STRIP_COMMENTS, '');
-        var argsFlat = clStr.match(FN_ARGS);
-        var spl = argsFlat[1].split(FN_ARG_SPLIT);
+        var spl = this.getDependenciesFromString(clStr);
 
         for (var i=0, l=spl.length; i<l; i++) {
             // Only override arg with non-falsey deps value at same key
@@ -126,6 +125,60 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         }
 
         return args;
+    };
+
+    infuse.getEsprima = function() {
+        var esprima = false;
+        try {
+            esprima = esprima || window.esprima;
+        } catch (e) {}
+
+        try {
+            esprima = esprima || global.esprima;
+        } catch (e) {}
+
+        try {
+            esprima = esprima || (typeof global !== "undefined" ? global : window).require("esprima");
+        } catch (e) {}
+
+        return esprima;
+    }
+
+    infuse.getDependenciesFromString = function(clStr) {
+        try {
+            var argsFlat = clStr.match(FN_ARGS);
+            var spl = argsFlat[1].split(FN_ARG_SPLIT);
+        } catch (firstE) {
+            var esprima = this.getEsprima();
+            if (esprima) {
+                try {
+                    var tree = esprima.parse(clStr);
+                    if (tree.body[0].type === "ClassDeclaration") {
+                        var classMethods = tree.body[0].body.body;
+                        var constructor = classMethods.filter(function(method) {
+                                return method.kind === "constructor"
+                            })[0];
+                        if (constructor) {
+                            spl = constructor.value
+                                .params
+                                .filter(function(param) { return param.type === "Identifier" })
+                                .map(function(param) { return param.name; });
+                        }
+                    } else {
+                        throw firstE;
+                    }
+                } catch (e) {
+                    throw e;
+                }
+            } else {
+                if (/^class/.test(clStr)) {
+                    console.log("infuse.js requires esprima to parse ES2015 classes.");
+                }
+                throw firstE;
+            }
+        }
+
+        return spl;
     };
 
     infuse.Injector.prototype = {

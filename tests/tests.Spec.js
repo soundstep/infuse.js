@@ -36,6 +36,10 @@ utils.inherit = function(target, obj) {
 	return subclass;
 };
 
+utils.getGlobal = function() {
+	return (typeof process === "undefined" ? window : global);
+}
+
 
 describe("infuse.js", function () {
 
@@ -1127,6 +1131,118 @@ describe("infuse.js", function () {
 			expect(childInjector.throwOnMissing).toBeFalsy();
 		});
 
+	});
+
+	describe("getEsprima()", function() {
+		it("should return ${GLOBAL}.esprima if available", function() {
+			var oldEsprima = utils.getGlobal().esprima;
+			utils.getGlobal().esprima = {};
+
+			expect(infuse.getEsprima()).toBe(utils.getGlobal().esprima);
+
+			utils.getGlobal().esprima = oldEsprima;
+		});
+
+		it("should attempt to require() if not already available", function() {
+			var fakeEsprima = {};
+			var oldRequire = utils.getGlobal().require;
+			utils.getGlobal().require = jasmine.createSpy("require");
+			utils.getGlobal().require.andReturn(fakeEsprima);
+
+			expect(infuse.getEsprima()).toBe(fakeEsprima);
+			expect(utils.getGlobal().require).toHaveBeenCalled();
+
+			utils.getGlobal().require = oldRequire;
+		});
+
+		it("should not error if all of the above fail", function() {
+			expect(function() { infuse.getEsprima() }).not.toThrow();
+		});
+	});
+
+	describe("getDependenciesFromString()", function() {
+		var esprima;
+		var ast;
+		var testString;
+		var expectedTestOutput;
+
+		beforeEach(function() {
+			testString = "i am a test string";
+			expectedTestOutput = [ "foo", "bar" ];
+			ast = {
+			    "type": "Program",
+			    "body": [
+			        {
+			            "type": "ClassDeclaration",
+			            "id": {
+			                "type": "Identifier",
+			                "name": "Foo"
+			            },
+			            "superClass": null,
+			            "body": {
+			                "type": "ClassBody",
+			                "body": [
+			                    {
+			                        "type": "MethodDefinition",
+			                        "key": {
+			                            "type": "Identifier",
+			                            "name": "constructor"
+			                        },
+			                        "computed": false,
+			                        "value": {
+			                            "type": "FunctionExpression",
+			                            "id": null,
+			                            "params": [
+			                                {
+			                                    "type": "Identifier",
+			                                    "name": "foo"
+			                                },
+			                                {
+			                                    "type": "Identifier",
+			                                    "name": "bar"
+			                                }
+			                            ],
+			                            "defaults": [],
+			                            "body": {
+			                                "type": "BlockStatement",
+			                                "body": []
+			                            },
+			                            "generator": false,
+			                            "expression": false
+			                        },
+			                        "kind": "constructor",
+			                        "static": false
+			                    }
+			                ]
+			            }
+			        }
+			    ],
+			    "sourceType": "script"
+			};
+			esprima = jasmine.createSpyObj("esprima", [ "parse" ]);
+			esprima.parse.andReturn(ast);
+
+			spyOn(infuse, "getEsprima").andReturn(esprima);
+		});
+
+		it("should be able to extract from ES5 classes without esprima", function() {
+			var string = function test(foo, bar) { baz = 'quux'; } + "";
+			expect(JSON.stringify(infuse.getDependenciesFromString(string)))
+				.toBe(JSON.stringify([ "foo", "bar" ]));
+
+			expect(infuse.getEsprima).not.toHaveBeenCalled();
+		});
+
+		it("should attempt to use esprima if the regexes fail", function() {
+			infuse.getDependenciesFromString(testString);
+
+			expect(infuse.getEsprima).toHaveBeenCalled();
+		});
+
+		it("should traverse esprima AST for ES2015 classes", function() {
+			expect(JSON.stringify(infuse.getDependenciesFromString(testString)))
+				.toBe(JSON.stringify(expectedTestOutput));
+		});
 	});
 
 });
