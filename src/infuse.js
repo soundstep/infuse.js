@@ -24,7 +24,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     infuse.version = '1.0.1';
 
     // regex from angular JS (https://github.com/angular/angular.js)
-    var FN_ARGS = /^function\s*[^\(]*\(\s*([^\)]*)\)/m;
+    var FN_ARGS_FUNCTION = /^function\s*[^\(]*\(\s*([^\)]*)\)/m;
+    var FN_ARGS_CLASS = /constructor\s*[^\(]*\(\s*([^\)]*)\)/m;
     var FN_ARG_SPLIT = /,/;
     var FN_ARG = /^\s*(_?)(\S+?)\1\s*$/;
     var STRIP_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg;
@@ -40,16 +41,17 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     }
 
     infuse.errors = {
-        MAPPING_BAD_PROP: '[Error infuse.Injector.mapClass/mapValue] the first parameter is invalid, a string is expected',
-        MAPPING_BAD_VALUE: '[Error infuse.Injector.mapClass/mapValue] the second parameter is invalid, it can\'t null or undefined, with property: ',
-        MAPPING_BAD_CLASS: '[Error infuse.Injector.mapClass/mapValue] the second parameter is invalid, a function is expected, with property: ',
-        MAPPING_BAD_SINGLETON: '[Error infuse.Injector.mapClass] the third parameter is invalid, a boolean is expected, with property: ',
-        MAPPING_ALREADY_EXISTS: '[Error infuse.Injector.mapClass/mapValue] this mapping already exists, with property: ',
-        CREATE_INSTANCE_INVALID_PARAM: '[Error infuse.Injector.createInstance] invalid parameter, a function is expected',
-        NO_MAPPING_FOUND: '[Error infuse.Injector.getInstance] no mapping found',
-        INJECT_INSTANCE_IN_ITSELF_PROPERTY: '[Error infuse.Injector.getInjectedValue] A matching property has been found in the target, you can\'t inject an instance in itself',
-        INJECT_INSTANCE_IN_ITSELF_CONSTRUCTOR: '[Error infuse.Injector.getInjectedValue] A matching constructor parameter has been found in the target, you can\'t inject an instance in itself',
-        DEPENDENCIES_MISSING_IN_STRICT_MODE: '[Error infuse.Injector.getDependencies] An "inject" property (array) that describes the dependencies is missing in strict mode.'
+        MAPPING_BAD_PROP: '[Error infuse.Injector.mapClass/mapValue] The first parameter is invalid, a string is expected.',
+        MAPPING_BAD_VALUE: '[Error infuse.Injector.mapClass/mapValue] The second parameter is invalid, it can\'t null or undefined, with property: ',
+        MAPPING_BAD_CLASS: '[Error infuse.Injector.mapClass/mapValue] The second parameter is invalid, a function is expected, with property: ',
+        MAPPING_BAD_SINGLETON: '[Error infuse.Injector.mapClass] The third parameter is invalid, a boolean is expected, with property: ',
+        MAPPING_ALREADY_EXISTS: '[Error infuse.Injector.mapClass/mapValue] This mapping already exists, with property: ',
+        CREATE_INSTANCE_INVALID_PARAM: '[Error infuse.Injector.createInstance] Invalid parameter, a function is expected.',
+        NO_MAPPING_FOUND: '[Error infuse.Injector.getInstance] No mapping found.',
+        INJECT_INSTANCE_IN_ITSELF_PROPERTY: '[Error infuse.Injector.getInjectedValue] A matching property has been found in the target, you can\'t inject an instance in itself.',
+        INJECT_INSTANCE_IN_ITSELF_CONSTRUCTOR: '[Error infuse.Injector.getInjectedValue] A matching constructor parameter has been found in the target, you can\'t inject an instance in itself.',
+        DEPENDENCIES_MISSING_IN_STRICT_MODE: '[Error infuse.Injector.getDependencies] An "inject" property (array) that describes the dependencies is missing in strict mode.',
+        DEPENDENCIES_INVALID_TARGET: '[Error infuse.Injector.getDependencies] Invalid target, a function or a class is expected (arrow function cannot be instantiated).'
     };
 
     var MappingVO = function(prop, value, cl, singleton) {
@@ -116,7 +118,19 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         }
 
         var clStr = cl.toString().replace(STRIP_COMMENTS, '');
-        var argsFlat = clStr.match(FN_ARGS);
+
+        var argsFlat;
+
+        if (~clStr.indexOf('function')) {
+            argsFlat = clStr.match(FN_ARGS_FUNCTION);
+        }
+        else if (~clStr.indexOf('class')) {
+            argsFlat = clStr.match(FN_ARGS_CLASS);
+        }
+        else {
+            throw new Error(infuse.errors.DEPENDENCIES_INVALID_TARGET);
+        }
+
         var spl = argsFlat[1].split(FN_ARG_SPLIT);
 
         for (var i=0, l=spl.length; i<l; i++) {
