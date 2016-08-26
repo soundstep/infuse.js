@@ -1158,6 +1158,33 @@ describe("infuse.js", function () {
 			expect(foo.age).toEqual(21);
 		});
 
+		it("should instantiate and fulfil the dependencies of an ES6 class with default values", function() {
+			injector.mapValue('name', 'John');
+			injector.mapValue('age', 21);
+			class FooClass {
+				constructor(name = 'david', age = 36) {
+					this.nameInjected = name;
+					this.ageInjected = age;
+				}
+			}
+			var foo = injector.createInstance(FooClass);
+			expect(foo.nameInjected).toEqual('John');
+			expect(foo.ageInjected).toEqual(21);
+		});
+
+		it("should retain default if no mapping found", function() {
+			injector.mapValue('name', 'John');
+			class FooClass {
+				constructor(name = 'david', age = 36) {
+					this.nameInjected = name;
+					this.ageInjected = age;
+				}
+			}
+			var foo = injector.createInstance(FooClass);
+			expect(foo.nameInjected).toEqual('John');
+			expect(foo.ageInjected).toEqual(36);
+		});
+
 		it("should be able to inject an ES6 class as a dependency", function() {
 			class FooClass {
 				constructor(){}
@@ -1177,6 +1204,18 @@ describe("infuse.js", function () {
 				this.injected = arrow;
 			}
 			expect(function(){ injector.createInstance(TestClass); }).toThrowError(infuse.errors.DEPENDENCIES_INVALID_TARGET);
+		});
+
+		it("should be able to use the inject property", function() {
+			injector.mapValue('name', 'John');
+			class FooClass {
+				constructor(dummyVariable){
+					this.nameInjected = dummyVariable;
+				}
+			}
+			FooClass.inject = ['name'];
+			var foo = injector.createInstance(FooClass);
+			expect(foo.nameInjected).toEqual('John');
 		});
 
 	});

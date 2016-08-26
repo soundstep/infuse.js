@@ -25,7 +25,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
     // regex from angular JS (https://github.com/angular/angular.js)
     var FN_ARGS_FUNCTION = /^function\s*[^\(]*\(\s*([^\)]*)\)/m;
-    var FN_ARGS_CLASS = /constructor\s*[^\(]*\(\s*([^\)]*)\)/m;
+    var FN_ARGS_CLASS = /constructor\s*[^\(|function]*\(\s*([^\)]*)\)\s*{/m;
     var FN_ARG_SPLIT = /,/;
     var FN_ARG = /^\s*(_?)(\S+?)\1\s*$/;
     var STRIP_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg;
@@ -134,8 +134,10 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         var spl = argsFlat[1].split(FN_ARG_SPLIT);
 
         for (var i=0, l=spl.length; i<l; i++) {
+            // removes default es6 values
+            var cArg = spl[i].split('=')[0].replace(/\s/g, '');
             // Only override arg with non-falsey deps value at same key
-            var arg = (deps && deps[i]) ? deps[i] : spl[i];
+            var arg = (deps && deps[i]) ? deps[i] : cArg;
             arg.replace(FN_ARG, extractName);
         }
 
