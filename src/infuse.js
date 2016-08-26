@@ -25,7 +25,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
     // regex from angular JS (https://github.com/angular/angular.js)
     var FN_ARGS_FUNCTION = /^function\s*[^\(]*\(\s*([^\)]*)\)/m;
-    var FN_ARGS_CLASS = /constructor\s*[^\(|function]*\(\s*([^\)]*)\)\s*{/m;
+    var FN_ARGS_CLASS = /^(?!function)\s*constructor\s*[^\(|function]*\(\s*([^\)]*)\)\s*{/m;
     var FN_ARG_SPLIT = /,/;
     var FN_ARG = /^\s*(_?)(\S+?)\1\s*$/;
     var STRIP_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg;
