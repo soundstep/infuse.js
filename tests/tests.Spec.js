@@ -1172,7 +1172,8 @@ describe("infuse.js", function () {
 			expect(foo.ageInjected).toEqual(21);
 		});
 
-		it("should retain default if no mapping found", function() {
+		it("should retain default argument values if no mapping found", function() {
+			injector.throwOnMissing = false;
 			injector.mapValue('name', 'John');
 			class FooClass {
 				constructor(name = 'david', age = 36) {
@@ -1181,6 +1182,7 @@ describe("infuse.js", function () {
 				}
 			}
 			var foo = injector.createInstance(FooClass);
+			console.log(foo);
 			expect(foo.nameInjected).toEqual('John');
 			expect(foo.ageInjected).toEqual(36);
 		});

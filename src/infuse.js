@@ -21,9 +21,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
     'use strict';
 
-    infuse.version = '1.0.1';
+    infuse.version = '2.0.0';
 
-    // regex from angular JS (https://github.com/angular/angular.js)
     var FN_ARGS_FUNCTION = /^function\s*[^\(]*\(\s*([^\)]*)\)/m;
     var FN_ARGS_CLASS = /^(?!function)\s*constructor\s*[^\(|function]*\(\s*([^\)]*)\)\s*{/m;
     var FN_ARG_SPLIT = /,/;
