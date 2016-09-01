@@ -1182,7 +1182,6 @@ describe("infuse.js", function () {
 				}
 			}
 			var foo = injector.createInstance(FooClass);
-			console.log(foo);
 			expect(foo.nameInjected).toEqual('John');
 			expect(foo.ageInjected).toEqual(36);
 		});
