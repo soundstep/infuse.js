@@ -123,7 +123,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         console.log(clStr);
 
         if (clStr.indexOf('class') === 0) {
-            argsFlat = clStr.match(FN_ARGS_CLASS);
+            argsFlat = clStr.replace(/function constructor/g, '').match(FN_ARGS_CLASS);
         }
         else if (clStr.indexOf('function') === 0) {
             argsFlat = clStr.match(FN_ARGS_FUNCTION);
