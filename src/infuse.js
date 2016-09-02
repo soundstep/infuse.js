@@ -24,7 +24,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     infuse.version = '2.0.0';
 
     var FN_ARGS_FUNCTION = /^function\s*[^\(]*\(\s*([^\)]*)\)/m;
-    var FN_ARGS_CLASS = /^(?!function)\s*constructor\s*[^\(|function]*\(\s*([^\)]*)\)\s*{/m;
+    var FN_ARGS_CLASS = /(?!function)\s*constructor\s*[^\(|function]*\(\s*([^\)]*)\)\s*{/m;
     var FN_ARG_SPLIT = /,/;
     var FN_ARG = /^\s*(_?)(\S+?)\1\s*$/;
     var STRIP_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg;
@@ -120,11 +120,13 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
         var argsFlat;
 
-        if (~clStr.indexOf('function')) {
-            argsFlat = clStr.match(FN_ARGS_FUNCTION);
-        }
-        else if (~clStr.indexOf('class')) {
+        console.log(clStr);
+
+        if (clStr.indexOf('class') === 0) {
             argsFlat = clStr.match(FN_ARGS_CLASS);
+        }
+        else if (clStr.indexOf('function') === 0) {
+            argsFlat = clStr.match(FN_ARGS_FUNCTION);
         }
         else {
             throw new Error(infuse.errors.DEPENDENCIES_INVALID_TARGET);

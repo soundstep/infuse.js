@@ -1186,6 +1186,19 @@ describe("infuse.js", function () {
 			expect(foo.ageInjected).toEqual(36);
 		});
 
+		it("should retain default argument values if no mapping found with a different syntax", function() {
+			injector.throwOnMissing = false;
+			injector.mapValue('name', 'John');
+			class FooClass { constructor(name = 'david', age = 36) {
+					this.nameInjected = name;
+					this.ageInjected = age;
+				}
+			}
+			var foo = injector.createInstance(FooClass);
+			expect(foo.nameInjected).toEqual('John');
+			expect(foo.ageInjected).toEqual(36);
+		});
+
 		it("should be able to inject an ES6 class as a dependency", function() {
 			class FooClass {
 				constructor(){}
@@ -1207,9 +1220,31 @@ describe("infuse.js", function () {
 			expect(function(){ injector.createInstance(TestClass); }).toThrowError(infuse.errors.DEPENDENCIES_INVALID_TARGET);
 		});
 
-		it("should be able to use the inject property", function() {
+		it("should be able to use the inject property on a class", function() {
 			injector.mapValue('name', 'John');
 			class FooClass {
+				constructor(dummyVariable){
+					this.nameInjected = dummyVariable;
+				}
+			}
+			FooClass.inject = ['name'];
+			var foo = injector.createInstance(FooClass);
+			expect(foo.nameInjected).toEqual('John');
+		});
+
+		it("should ignore other constructor names in a class", function() {
+			injector.mapValue('name', 'John');
+			class FooClass {
+				static foo(bar) {
+					var constructor = function(no1, no2) {};
+					function constructor(no1, no2){}
+					function constructor (no1, no2){}
+					constructor(no1, no2);
+					constructor (no1, no2);
+				}
+				func() {
+					this.constructor = function(){}
+				}
 				constructor(dummyVariable){
 					this.nameInjected = dummyVariable;
 				}
