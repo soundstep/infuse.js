@@ -21,7 +21,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
     'use strict';
 
-    infuse.version = '2.0.0';
+    infuse.version = '2.0.1';
 
     var FN_ARGS_FUNCTION = /^function\s*[^\(]*\(\s*([^\)]*)\)/m;
     var FN_ARGS_CLASS = /(?!function)\s*constructor\s*[^\(|function]*\(\s*([^\)]*)\)\s*{/m;
@@ -119,8 +119,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         var clStr = cl.toString().replace(STRIP_COMMENTS, '');
 
         var argsFlat;
-
-        console.log(clStr);
 
         if (clStr.indexOf('class') === 0) {
             argsFlat = clStr.replace(/function constructor/g, '').match(FN_ARGS_CLASS);
