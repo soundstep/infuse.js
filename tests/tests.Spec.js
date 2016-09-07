@@ -1254,6 +1254,18 @@ describe("infuse.js", function () {
 			expect(foo.nameInjected).toEqual('John');
 		});
 
+		it("should be able to inject an ES6 class as a dependency without constructor", function() {
+			class FooClass {
+				
+			}
+			injector.mapClass('foo', FooClass);
+			function TestClass(foo) {
+				this.injected = foo;
+			}
+			var testClass = injector.createInstance(TestClass);
+			expect(testClass.injected instanceof FooClass).toBeTruthy();
+		});
+
 	});
 
 });

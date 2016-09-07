@@ -21,7 +21,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
     'use strict';
 
-    infuse.version = '2.0.1';
+    infuse.version = '2.0.2';
 
     var FN_ARGS_FUNCTION = /^function\s*[^\(]*\(\s*([^\)]*)\)/m;
     var FN_ARGS_CLASS = /(?!function)\s*constructor\s*[^\(|function]*\(\s*([^\)]*)\)\s*{/m;
@@ -130,14 +130,15 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             throw new Error(infuse.errors.DEPENDENCIES_INVALID_TARGET);
         }
 
-        var spl = argsFlat[1].split(FN_ARG_SPLIT);
-
-        for (var i=0, l=spl.length; i<l; i++) {
-            // removes default es6 values
-            var cArg = spl[i].split('=')[0].replace(/\s/g, '');
-            // Only override arg with non-falsey deps value at same key
-            var arg = (deps && deps[i]) ? deps[i] : cArg;
-            arg.replace(FN_ARG, extractName);
+        if (argsFlat) {
+            var spl = argsFlat[1].split(FN_ARG_SPLIT);
+            for (var i=0, l=spl.length; i<l; i++) {
+                // removes default es6 values
+                var cArg = spl[i].split('=')[0].replace(/\s/g, '');
+                // Only override arg with non-falsey deps value at same key
+                var arg = (deps && deps[i]) ? deps[i] : cArg;
+                arg.replace(FN_ARG, extractName);
+            }
         }
 
         return args;
