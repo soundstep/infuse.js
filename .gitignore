@@ -22,14 +22,6 @@ Thumbs.db
 ehthumbs.db
 Icon?
 
-# Dreamweaver added files
-_notes
-dwsync.xml
-
-# Komodo
-*.komodoproject
-.komodotools
-
 # Folders to ignore
 .hg
 .svn
@@ -44,3 +36,4 @@ phing
 
 components
 node_modules
+package-lock.json

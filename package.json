@@ -1,22 +1,30 @@
 {
-	"name": "infuse.js",
-	"version": "2.0.2",
-	"author": "Romuald Quantin <romu@soundstep.com> (http://www.soundstep.com)",
-	"description": "Javascript IOC library for dependency injection",
-	"keywords": ["infuse.js", "infusejs", "ioc", "di", "dependency", "injection"],
-	"homepage": "https://github.com/soundstep/infuse.js",
-	"repository": {
-		"type": "git",
-		"url": "http://github.com/soundstep/infuse.js.git"
-	},
-	"main": "src/infuse.js",
-	"devDependencies": {
-		"grunt": ">=0.4.x",
-		"grunt-contrib-watch": "*",
-		"grunt-contrib-concat": "*",
-		"grunt-contrib-uglify": "*"
-	},
-	"scripts": {
-		"test": "jasmine-node tests/"
-	}
+    "name": "infuse.js",
+    "version": "2.1.0",
+    "author": "Romuald Quantin <romu@soundstep.com> (http://www.soundstep.com)",
+    "license": "MIT",
+    "description": "Javascript IOC library for dependency injection",
+    "keywords": [
+        "infuse.js",
+        "infusejs",
+        "ioc",
+        "di",
+        "dependency",
+        "injection"
+    ],
+    "homepage": "https://github.com/soundstep/infuse.js",
+    "repository": {
+        "type": "git",
+        "url": "http://github.com/soundstep/infuse.js.git"
+    },
+    "main": "src/infuse.js",
+    "devDependencies": {
+        "grunt": ">=0.4.x",
+        "grunt-contrib-watch": "*",
+        "grunt-contrib-concat": "*",
+        "grunt-contrib-uglify": "*"
+    },
+    "scripts": {
+        "test": "jasmine-node tests/"
+    }
 }

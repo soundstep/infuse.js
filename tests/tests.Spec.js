@@ -182,9 +182,9 @@ describe("infuse.js", function () {
 	});
 
 	it("get value no mapping throws error", function () {
-		expect(function(){injector.getValue("name")}).toThrowError(infuse.errors.NO_MAPPING_FOUND);
-		expect(function(){injector.getValue("name", undefined)}).toThrowError(infuse.errors.NO_MAPPING_FOUND);
-		expect(function(){injector.getValue("name", null)}).toThrowError(infuse.errors.NO_MAPPING_FOUND);
+		expect(function(){injector.getValue("name")}).toThrowError(/No mapping found/);
+		expect(function(){injector.getValue("name", undefined)}).toThrowError(/No mapping found/);
+		expect(function(){injector.getValue("name", null)}).toThrowError(/No mapping found/);
 	});
 
 	it("get class", function () {
@@ -525,7 +525,7 @@ describe("infuse.js", function () {
 
 	it("get instance no mapping throws error", function () {
 		var FooClass = function(){this.name=null;};
-		expect(function(){injector.getValueFromClass(FooClass)}).toThrowError(infuse.errors.NO_MAPPING_FOUND);
+		expect(function(){injector.getValueFromClass(FooClass)}).toThrowError(/No mapping found/);
 	});
 
 	it("get instance bad singleton parameter throws error", function () {
@@ -744,9 +744,9 @@ describe("infuse.js", function () {
 		expect(injector.hasMapping("name1")).toBeFalsy();
 		expect(injector.hasMapping("name2")).toBeFalsy();
 		expect(injector.hasMapping("name3")).toBeFalsy();
-		expect(function(){injector.getValueFromClass(FooClass)}).toThrowError(infuse.errors.NO_MAPPING_FOUND);
-		expect(function(){injector.getValue("name2")}).toThrowError(infuse.errors.NO_MAPPING_FOUND);
-		expect(function(){injector.getValue("name3")}).toThrowError(infuse.errors.NO_MAPPING_FOUND);
+		expect(function(){injector.getValueFromClass(FooClass)}).toThrowError(/No mapping found/);
+		expect(function(){injector.getValue("name2")}).toThrowError(/No mapping found/);
+		expect(function(){injector.getValue("name3")}).toThrowError(/No mapping found/);
 		var injectee = injector.createInstance(InjecteeClass);
 		expect(injectee.name1).toBeNull();
 		expect(injectee.name2).toBeNull();
@@ -1108,6 +1108,16 @@ describe("infuse.js", function () {
 			injector.mapClass("fooClass", function(missing){});
 		});
 
+		it("getValue with throwOnMissing false should return undefined", function () {
+			injector.throwOnMissing = false;
+			expect(injector.getValue('not-existing')).toBeUndefined();
+		});
+	
+		it("getValueFromClass with throwOnMissing false should return undefined", function () {
+			injector.throwOnMissing = false;
+			expect(injector.getValue(function NotExisting(){})).toBeUndefined();
+		});
+	
 		it("causes requesting a missing value to throw", function () {
 			expect(function(){injector.getValue("missing")}).toThrow();
 			expect(function(){injector.getValue("fooClass")}).toThrow();

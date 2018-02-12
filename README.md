@@ -12,11 +12,6 @@ Or install it with npm for node.js:
 ```js
 npm install infuse.js
 ```
-Or install it with bower:
-
-```js
-bower install infuse.js --save
-```
 
 ## create injector
 

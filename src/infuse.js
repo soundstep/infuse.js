@@ -1,5 +1,5 @@
 /*
-Copyright (c) | 2016 | infuse.js | Romuald Quantin | www.soundstep.com | romu@soundstep.com
+Copyright (c) | 2018 | infuse.js | Romuald Quantin | www.soundstep.com | romu@soundstep.com
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software
 and associated documentation files (the "Software"), to deal in the Software without restriction,
@@ -21,7 +21,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
     'use strict';
 
-    infuse.version = '2.0.2';
+    infuse.version = '2.1.0';
 
     var FN_ARGS_FUNCTION = /^function\s*[^\(]*\(\s*([^\)]*)\)/m;
     var FN_ARGS_CLASS = /(?!function)\s*constructor\s*[^\(|function]*\(\s*([^\)]*)\)\s*{/m;
@@ -40,17 +40,17 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     }
 
     infuse.errors = {
-        MAPPING_BAD_PROP: '[Error infuse.Injector.mapClass/mapValue] The first parameter is invalid, a string is expected.',
-        MAPPING_BAD_VALUE: '[Error infuse.Injector.mapClass/mapValue] The second parameter is invalid, it can\'t null or undefined, with property: ',
-        MAPPING_BAD_CLASS: '[Error infuse.Injector.mapClass/mapValue] The second parameter is invalid, a function is expected, with property: ',
-        MAPPING_BAD_SINGLETON: '[Error infuse.Injector.mapClass] The third parameter is invalid, a boolean is expected, with property: ',
-        MAPPING_ALREADY_EXISTS: '[Error infuse.Injector.mapClass/mapValue] This mapping already exists, with property: ',
-        CREATE_INSTANCE_INVALID_PARAM: '[Error infuse.Injector.createInstance] Invalid parameter, a function is expected.',
-        NO_MAPPING_FOUND: '[Error infuse.Injector.getInstance] No mapping found.',
-        INJECT_INSTANCE_IN_ITSELF_PROPERTY: '[Error infuse.Injector.getInjectedValue] A matching property has been found in the target, you can\'t inject an instance in itself.',
-        INJECT_INSTANCE_IN_ITSELF_CONSTRUCTOR: '[Error infuse.Injector.getInjectedValue] A matching constructor parameter has been found in the target, you can\'t inject an instance in itself.',
-        DEPENDENCIES_MISSING_IN_STRICT_MODE: '[Error infuse.Injector.getDependencies] An "inject" property (array) that describes the dependencies is missing in strict mode.',
-        DEPENDENCIES_INVALID_TARGET: '[Error infuse.Injector.getDependencies] Invalid target, a function or a class is expected (arrow function cannot be instantiated).'
+        MAPPING_BAD_PROP: '[Error Injector.MAPPING_BAD_PROP] The first parameter is invalid, a string is expected.',
+        MAPPING_BAD_VALUE: '[Error Injector.MAPPING_BAD_VALUE] The second parameter is invalid, it can\'t null or undefined, with property: ',
+        MAPPING_BAD_CLASS: '[Error Injector.MAPPING_BAD_CLASS] The second parameter is invalid, a function is expected, with property: ',
+        MAPPING_BAD_SINGLETON: '[Error Injector.MAPPING_BAD_SINGLETON] The third parameter is invalid, a boolean is expected, with property: ',
+        MAPPING_ALREADY_EXISTS: '[Error Injector.MAPPING_ALREADY_EXISTS] This mapping already exists, with property: ',
+        CREATE_INSTANCE_INVALID_PARAM: '[Error Injector.CREATE_INSTANCE_INVALID_PARAM] Invalid parameter, a function is expected.',
+        NO_MAPPING_FOUND: '[Error Injector.NO_MAPPING_FOUND] No mapping found',
+        INJECT_INSTANCE_IN_ITSELF_PROPERTY: '[Error Injector.INJECT_INSTANCE_IN_ITSELF_PROPERTY] A matching property has been found in the target, you can\'t inject an instance in itself.',
+        INJECT_INSTANCE_IN_ITSELF_CONSTRUCTOR: '[Error Injector.INJECT_INSTANCE_IN_ITSELF_CONSTRUCTOR] A matching constructor parameter has been found in the target, you can\'t inject an instance in itself.',
+        DEPENDENCIES_MISSING_IN_STRICT_MODE: '[Error Injector.DEPENDENCIES_MISSING_IN_STRICT_MODE] An "inject" property (array) that describes the dependencies is missing in strict mode.',
+        DEPENDENCIES_INVALID_TARGET: '[Error Injector.DEPENDENCIES_INVALID_TARGET] Invalid target, a function or a class is expected (arrow function cannot be instantiated).'
     };
 
     var MappingVO = function(prop, value, cl, singleton) {
@@ -95,6 +95,12 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         if (target.hasOwnProperty(name)) {
             throw new Error(infuse.errors.INJECT_INSTANCE_IN_ITSELF_PROPERTY);
         }
+    };
+
+    var formatMappingError = function(propName, className) {
+        var nameInfo = propName !== undefined ? ' for the injection name: "' + propName + '"' : '';
+        var classInfo = className !== undefined ? ' when instantiating: "' + className + '"' : '';
+        return infuse.errors.NO_MAPPING_FOUND + nameInfo + classInfo + '.';
     };
 
     infuse.Injector = function() {
@@ -222,8 +228,11 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
                 if (this.parent) {
                     vo = this.parent.getMappingVo.apply(this.parent, arguments);
                 }
+                else if (this.throwOnMissing) {
+                    throw new Error(formatMappingError(prop));
+                }
                 else {
-                    throw new Error(infuse.errors.NO_MAPPING_FOUND);
+                    return;
                 }
             }
             if (vo.cl) {
@@ -284,8 +293,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
                     else {
                         // no mapping found
                         if (this.throwOnMissing) {
-                            // throw new Error(infuse.errors.NO_MAPPING_FOUND + " for dependency '" + name + "' when instantiating '" + TargetClass.name + "'");
-                            throw new Error(infuse.errors.NO_MAPPING_FOUND + ' for dependency "' + name + '" when instantiating "' + TargetClass.name + '"');
+                            throw new Error(formatMappingError(name, TargetClass.name));
                         }
                         args.push(undefined);
                     }
@@ -362,8 +370,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             }
             if (this.parent) {
                 return this.parent.getValueFromClass.apply(this.parent, arguments);
-            } else {
-                throw new Error(infuse.errors.NO_MAPPING_FOUND);
+            } else if (this.throwOnMissing) {
+                throw new Error(formatMappingError(undefined, cl.name));
             }
         },
 
