@@ -1072,13 +1072,56 @@ describe("infuse.js", function () {
 		expect(injector.strictMode).toBeFalsy();
 	});
 
-	it("missing dependencies in strict mode should throw an error", function () {
+	it("missing dependencies in strict mode with constructor injection should throw an error", function() {
 		injector.strictMode = true;
 		var FooClass = function(type){this.typeParam = type;};
   		injector.mapClass("name", FooClass);
   		injector.mapValue("type", "type");
 		expect(function(){injector.getValue("name")}).toThrowError(infuse.errors.DEPENDENCIES_MISSING_IN_STRICT_MODE);
 	});
+
+	it("missing dependencies in strict mode with constructor injection should throw an error", function () {
+		injector.strictMode = true;
+		injector.mapValue('config', { data: 1 });
+		var Injectee = function() { this.config = null; };
+		expect(function(){injector.createInstance(Injectee)}).toThrowError(infuse.errors.DEPENDENCIES_MISSING_IN_STRICT_MODE);
+	});
+
+	it("should not throw an error with property injection when injecting in class in strict mode with constructor injection ", function () {
+		injector.strictModeConstructorInjection = true;
+		var FooClass = function(){this.typeParam = null;};
+  		injector.mapClass("name", FooClass);
+		expect(function() { injector.getValue("name") }).not.toThrowError(infuse.errors.DEPENDENCIES_MISSING_IN_STRICT_MODE);
+	});
+
+	it("should not throw an error if injected dependencies is zero in strict mode with constructor injection ", function() {
+		injector.strictModeConstructorInjection = true;
+		var FooClass = function(){};
+		injector.mapClass("name", FooClass);
+		expect(function() { injector.getValue("name") }).not.toThrowError(infuse.errors.DEPENDENCIES_MISSING_IN_STRICT_MODE);
+		expect(function() { injector.getValue("name") }).not.toThrowError(infuse.errors.DEPENDENCIES_MISSING_IN_STRICT_MODE_CONSTRUCTOR_INJECTION);
+	})
+
+	it("should throw an error if injected dependencies is zero in strict mode with constructor injection ", function() {
+		injector.strictModeConstructorInjection = true;
+		var FooClass = function(type){this.typeParam = type;};
+		injector.mapClass("name", FooClass);
+		expect(function() { injector.getValue("name") }).toThrowError(infuse.errors.DEPENDENCIES_MISSING_IN_STRICT_MODE_CONSTRUCTOR_INJECTION);
+	})
+
+	it("should throw an error with property injection when injecting in class in strict mode", function () {
+		injector.strictMode = true;
+		var FooClass = function(){this.typeParam = null;};
+  		injector.mapClass("name", FooClass);
+		expect(function() { injector.getValue("name") }).toThrowError(infuse.errors.DEPENDENCIES_MISSING_IN_STRICT_MODE);
+	});
+
+	it("should throw an error if injected dependencies is zero in strict mode", function() {
+		injector.strictMode = true;
+		var FooClass = function(){};
+		injector.mapClass("name", FooClass);
+		expect(function(){injector.getValue("name")}).toThrowError(infuse.errors.DEPENDENCIES_MISSING_IN_STRICT_MODE);
+	})
 
 	it("strict mode is inherited in child injectors", function () {
 		injector.strictMode = true;
