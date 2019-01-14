@@ -50,6 +50,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         INJECT_INSTANCE_IN_ITSELF_PROPERTY: '[Error Injector.INJECT_INSTANCE_IN_ITSELF_PROPERTY] A matching property has been found in the target, you can\'t inject an instance in itself.',
         INJECT_INSTANCE_IN_ITSELF_CONSTRUCTOR: '[Error Injector.INJECT_INSTANCE_IN_ITSELF_CONSTRUCTOR] A matching constructor parameter has been found in the target, you can\'t inject an instance in itself.',
         DEPENDENCIES_MISSING_IN_STRICT_MODE: '[Error Injector.DEPENDENCIES_MISSING_IN_STRICT_MODE] An "inject" property (array) that describes the dependencies is missing in strict mode.',
+        DEPENDENCIES_MISSING_IN_STRICT_MODE_CONSTRUCTOR_INJECTION: '[Error Injector.DEPENDENCIES_MISSING_IN_STRICT_MODE_CONSTRUCTOR_INJECTION] An "inject" property (array) that describes the dependencies of constructor is missing in strict mode.',
         DEPENDENCIES_INVALID_TARGET: '[Error Injector.DEPENDENCIES_INVALID_TARGET] Invalid target, a function or a class is expected (arrow function cannot be instantiated).'
     };
 
@@ -107,6 +108,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         this.mappings = {};
         this.parent = null;
         this.strictMode = false;
+        this.strictModeConstructorInjection = false;
         this.throwOnMissing = true;
     };
 
@@ -156,6 +158,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             var injector = new infuse.Injector();
             injector.parent = this;
             injector.strictMode = this.strictMode;
+            injector.strictModeConstructorInjection = this.strictModeConstructorInjection;
             injector.throwOnMissing = this.throwOnMissing;
             return injector;
         },
@@ -271,11 +274,14 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
             if (typeof TargetClass !== 'function') {
                 throw new Error(infuse.errors.CREATE_INSTANCE_INVALID_PARAM);
             }
+            var params = infuse.getDependencies(TargetClass);
             if (this.strictMode && !TargetClass.hasOwnProperty('inject')) {
                 throw new Error(infuse.errors.DEPENDENCIES_MISSING_IN_STRICT_MODE);
             }
+            else if (this.strictModeConstructorInjection && params.length > 0 && !TargetClass.hasOwnProperty('inject')) {
+                throw new Error(infuse.errors.DEPENDENCIES_MISSING_IN_STRICT_MODE_CONSTRUCTOR_INJECTION);
+            }
             var args = [null];
-            var params = infuse.getDependencies(TargetClass);
             for (var i=0, l=params.length; i<l; i++) {
                 if (arguments.length > i+1 && arguments[i+1] !== undefined && arguments[i+1] !== null) {
                     // argument found
